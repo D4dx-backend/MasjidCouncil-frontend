@@ -1,0 +1,285 @@
+import React from 'react';
+import { ArrowLeft, Download, Edit, Printer } from 'lucide-react';
+
+const MosqueFundList = ({ onBack, onEdit }) => {
+  // Comprehensive dummy data for mosque fund application
+  const formData = {
+    // Mosque Details
+    mosqueName: "ബൈതുൽ മുകറം മസ്ജിദ്",
+    mckAffiliation: "MCK/2023/078",
+    address: "ബൈതുൽ മുകറം മസ്ജിദ്\nചർച്ച് റോഡ്\nകഴക്കൂട്ടം\nതിരുവനന്തപുരം ജില്ല\nകേരളം - 695013",
+    managementType: "മാനേജിംഗ് കമ്മിറ്റി",
+    presidentSecretary: "സലിം ഹാജി",
+    jamathIslami: "കഴക്കൂട്ടം ജമാഅത്ത്",
+    phone: "0471-2345678",
+    area: "കഴക്കൂട്ടം ഏരിയ",
+    district: "തിരുവനന്തപുരം",
+    
+    // Help Status
+    mckFundService: "ഉണ്ട്",
+    previousHelp: "ഇല്ല",
+    
+    // Current Help Details
+    helpPurpose: "മസ്ജിദ് മേൽക്കൂര അറ്റകുറ്റപ്പണി",
+    needDescription: "മഴക്കാലത്ത് മസ്ജിദിന്റെ മേൽക്കൂരയിൽ നിന്ന് ചോരുന്ന കാരണത്താൽ നമസ്കാര പ്രവർത്തനങ്ങൾ ബാധിക്കപ്പെടുന്നുണ്ട്. 40 വർഷം പഴക്കമുള്ള ഈ മസ്ജിദിന്റെ മേൽക്കൂര പൂർണമായും പുനർനിർമ്മിക്കേണ്ടതുണ്ട്. മസ്ജിദിന്റെ വിസ്തീർണം 2500 ചതുരശ്ര അടിയാണ്. പുതിയ ടൈലുകൾ, ട്രസുകൾ, സീലിംഗ് എന്നിവ ആവശ്യമാണ്.",
+    expectedExpense: "350000",
+    ownContribution: "150000",
+    
+    // Contact Details
+    mosqueOfficialName: "മുഹമ്മദ് ഫൈസൽ (സെക്രട്ടറി)",
+    mosqueOfficialPhone: "9876543210",
+    whatsappNumber: "9876543210",
+    
+    // Bank Details
+    bankPassbook: "അക്കൗണ്ട് നമ്പർ: 1234567890123456\nഅക്കൗണ്ട് ഹോൾഡർ: ബൈതുൽ മുകറം മസ്ജിദ് കമ്മിറ്റി\nബാങ്ക്: സൗത്ത് ഇന്ത്യൻ ബാങ്ക്\nബ്രാഞ്ച്: കഴക്കൂട്ടം\nIFSC: SIBL0000123",
+    plan:"test/new/test",
+    fullEstimate: "മേൽക്കൂര നീക്കം: ₹30,000\nട്രസ് പണി: ₹120,000\nടൈൽ പണി: ₹80,000\nസീലിംഗ് പണി: ₹60,000\nപെയിന്റിംഗ്: ₹40,000\nലേബർ ചാർജ്: ₹20,000\nമൊത്തം: ₹350,000",
+    
+    // Declarations
+    declaration1: true,
+    declaration2: true,
+    
+    // Additional fields for display
+    applicationId: "MFD/2025/078",
+    submissionDate: "2025-01-20",
+    status: "പരിഗണനയിൽ",
+    requestedAmount: "200000", // expectedExpense - ownContribution
+    
+    // Fund Collection History
+    monthlyFundCollection: "₹8,500",
+    lastFundSubmission: "ഡിസംബർ 2024",
+    totalFundContributed: "₹1,02,000 (2024 വർഷം)",
+    
+    // Mosque Specifications
+    mosqueCapacity: "250 പേർ",
+    constructionYear: "1984",
+    lastMaintenance: "2020",
+    mosqueFacilities: ["വുദുഖാന", "പാർക്കിംഗ്", "ജനറേറ്റർ", "സൗണ്ട് സിസ്റ്റം"],
+    
+    // Committee Details
+    committeeMembers: [
+      { position: "പ്രസിഡന്റ്", name: "സലിം ഹാജി", phone: "9876543201" },
+      { position: "സെക്രട്ടറി", name: "മുഹമ്മദ് ഫൈസൽ", phone: "9876543210" },
+      { position: "ട്രഷറർ", name: "ഇബ്രാഹിം സാഹിബ്", phone: "9876543202" }
+    ]
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    alert('ഡൗൺലോഡ് ഫീച്ചർ ഉടൻ ലഭ്യമാകും');
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      'പരിഗണനയിൽ': 'bg-yellow-100 text-yellow-800',
+      'അനുമതി': 'bg-green-100 text-green-800',
+      'നിരസിച്ചു': 'bg-red-100 text-red-800'
+    };
+    
+    return (
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {status}
+      </span>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+        {/* Header */}
+        <div className="bg-green-700 text-white p-6 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={onBack}
+                className="p-2 hover:bg-purple-700 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold">മസ്ജിദ് ഫണ്ട് സഹായ അപേക്ഷ</h1>
+                <p className="text-purple-100">Mosque Fund Application Details</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="p-8 space-y-8">
+          {/* Application Summary */}
+          <section className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600">അപേക്ഷാ നമ്പർ</label>
+                <p className="text-lg font-bold text-purple-600">{formData.applicationId}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">സമർപ്പിച്ച തീയതി</label>
+                <p className="text-lg font-medium text-gray-900">{formData.submissionDate}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">നിലവിലെ അവസ്ഥ</label>
+                <div className="mt-1">{getStatusBadge(formData.status)}</div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ആവശ്യപ്പെടുന്ന തുക</label>
+                <p className="text-lg font-bold text-red-600">₹{formData.requestedAmount}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Mosque Basic Information */}
+          <section className="border border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്ജിദ് വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600">മസ്ജിദിന്റെ പേര്</label>
+                <p className="text-lg font-medium text-gray-900">{formData.mosqueName}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">MCK അഫിലിയേഷൻ നമ്പർ</label>
+                <p className="text-lg font-medium text-gray-900">{formData.mckAffiliation}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്റ്റ്</label>
+                <p className="text-gray-900">{formData.managementType}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">പ്രസിഡന്റ്/ചെയർമാൻ</label>
+                <p className="text-gray-900">{formData.presidentSecretary}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ഫോൺ</label>
+                <p className="text-gray-900">{formData.phone}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ജമാഅത്തെ ഇസ്‌ലാമി പ്രാദേശിക ഘടകം</label>
+                <p className="text-gray-900">{formData.jamathIslami}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ഏരിയ</label>
+                <p className="text-gray-900">{formData.area}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ജില്ല</label>
+                <p className="text-gray-900">{formData.district}</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="text-sm font-medium text-gray-600">പൂർണ വിലാസം</label>
+              <p className="text-gray-900 whitespace-pre-wrap">{formData.address}</p>
+            </div>
+          </section>
+
+          {/* Mosque Specifications */}
+          {/* <section className="border border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്ജിദിന്റെ വിശേഷതകൾ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600">നിർമ്മാണ വർഷം</label>
+                <p className="text-gray-900">{formData.constructionYear}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ശേഷി</label>
+                <p className="text-gray-900">{formData.mosqueCapacity}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">അവസാന അറ്റകുറ്റപ്പണി</label>
+                <p className="text-gray-900">{formData.lastMaintenance}</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="text-sm font-medium text-gray-600">സൗകര്യങ്ങൾ</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                {formData.mosqueFacilities.map((facility, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-gray-900 text-sm">{facility}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section> */}
+
+          {/* Fund Collection History */}
+          <section className="border border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600">മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് മാസാന്ത ഫണ്ട് ശേഖരണം നടക്കാറുണ്ടോ</label>
+                <p className="text-lg font-medium text-green-600">{formData.mckFundService}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">മസ്‌ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ</label>
+                <p className="text-lg font-medium text-gray-900">{formData.previousHelp}</p>
+              </div>
+              
+            </div>
+            
+          </section>
+
+          {/* Current Help Request */}
+          <section className="border border-gray-200 rounded-lg p-6">നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2"></h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600">സഹായം ആവശ്യമായ ഇനം</label>
+                <p className="text-lg font-medium text-purple-600">{formData.helpPurpose}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">ആവശ്യത്തിന്റെ വിശദവിവരം</label>
+                <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{formData.needDescription}</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <label className="text-sm font-medium text-gray-600">സ്വന്തം സംഭാവന</label>
+                  <p className="text-xl font-bold text-green-600">₹{formData.ownContribution}</p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <label className="text-sm font-medium text-gray-600">ആവശ്യപ്പെടുന്ന തുക</label>
+                  <p className="text-xl font-bold text-blue-600">₹{formData.requestedAmount}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+
+
+
+
+          {/* Bank Details */}
+          <section className="border border-gray-200 rounded-lg p-6">
+            <h1 className='text-xl font-semibold mb-4 text-gray-800 border-b pb-2'>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h1>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ബാങ്ക് വിവരങ്ങൾ</h2>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <label className="text-sm font-medium text-gray-600 block mb-2">ബാങ്ക് പാസ് ബുക്ക് വിവരങ്ങൾ</label>
+              <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.bankPassbook}</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <label className="text-sm font-medium text-gray-600 block mb-2">പ്ലാൻ, എസ്റ്റിമേറ്റ് വിവരങ്ങൾ</label>
+              <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.plan}</p>
+            </div>
+          </section>
+
+
+          <div className="flex justify-between mt-4">
+  <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md shadow">
+    Confirm
+  </button>
+  <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-md shadow">
+    Reject
+  </button>
+</div>
+
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MosqueFundList;
