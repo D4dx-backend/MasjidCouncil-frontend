@@ -38,17 +38,67 @@ const MosqueFundForm = () => {
     declaration2: false
   });
 
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const validateField = (fieldName, value) => {
+    let isValid = true;
+    
+    if (['phone', 'mosqueOfficialPhone', 'whatsappNumber'].includes(fieldName)) {
+      if (value && !validateMobileNumber(value)) {
+        isValid = false;
+      }
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [fieldName]: !isValid
+    }));
+    
+    return isValid;
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
     }));
+    
+    if (type !== 'checkbox') {
+      validateField(name, value);
+    }
+  };
+
+  const validateMobileNumber = (number) => {
+    const mobileRegex = /^[0-9]{10}$/;
+    return mobileRegex.test(number);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async () => {
     if (!formData.declaration1 || !formData.declaration2) {
       alert('കൃപയാ എല്ലാ പ്രഖ്യാപനങ്ങളും അംഗീകരിക്കുക');
+      return;
+    }
+
+    // Mobile number validation
+    if (formData.phone && !validateMobileNumber(formData.phone)) {
+      alert("ദയവായി സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (formData.mosqueOfficialPhone && !validateMobileNumber(formData.mosqueOfficialPhone)) {
+      alert("ദയവായി മസ്ജിദ് ഉദ്യോഗസ്ഥന്റെ സാധുവായ 10 അക്ക ഫോൺ നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (formData.whatsappNumber && !validateMobileNumber(formData.whatsappNumber)) {
+      alert("ദയവായി സാധുവായ 10 അക്ക വാട്സാപ്പ് നമ്പർ നൽകുക");
       return;
     }
 
@@ -183,11 +233,11 @@ const MosqueFundForm = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മസ്ജിദിന്റെ പേര്
               </label>
               <input
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 type="text"
                 name="mosqueName"
                 value={formData.mosqueName}
@@ -197,7 +247,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 എം സി കെ അഫിലിയേഷൻ നമ്പർ
               </label>
               <input
@@ -212,7 +262,7 @@ const MosqueFundForm = () => {
           </div>
           
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+            <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               വിലാസം
             </label>
             <textarea
@@ -227,7 +277,7 @@ const MosqueFundForm = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്‌റ്റ്
               </label>
               <input
@@ -239,7 +289,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               പ്രസിഡൻ്റ്/ ചെയർമാൻ
               </label>
               <input
@@ -251,7 +301,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഫോൺ
               </label>
               <input
@@ -259,12 +309,14 @@ const MosqueFundForm = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ജമാഅത്തെ ഇസ്‌ലാമി പ്രാദേശിക ഘടകം
               </label>
               <input
@@ -276,7 +328,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഏരിയ
               </label>
               <input
@@ -288,11 +340,11 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ജില്ല
               </label>
               <select
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
@@ -321,14 +373,14 @@ const MosqueFundForm = () => {
 
         {/* Help Status Section */}
         <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>മുമ്പ് സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് മാസാന്ത ഫണ്ട് ശേഖരണം നടക്കാറുണ്ടോ
               </label>
               <select
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="mckFundService"
                 value={formData.mckFundService}
                 onChange={handleInputChange}
@@ -341,11 +393,11 @@ const MosqueFundForm = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               മസ്‌ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ
               </label>
               <select
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="previousHelp"
                 value={formData.previousHelp}
                 onChange={handleInputChange}
@@ -362,10 +414,10 @@ const MosqueFundForm = () => {
 
         {/* Current Help Section */}
         <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>നലവിലെ സഹായം സംബന്ധിച്ച വിവരങ്ങൾ</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ഇപ്പോൾ സഹായം ആവശ്യമായ ഇനം
               </label>
               <input
@@ -379,7 +431,7 @@ const MosqueFundForm = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ആവശ്യത്തിന്റെ വിശദവിവരം
               </label>
               <textarea
@@ -394,11 +446,11 @@ const MosqueFundForm = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                   പ്രതീക്ഷിക്കുന്ന ചെലവ് (രൂപ)
                 </label>
                 <input
-                style={{ fontFamily: "Anek Malayalam Variable" }}
+                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   type="number"
                   name="expectedExpense"
                   value={formData.expectedExpense}
@@ -408,11 +460,11 @@ const MosqueFundForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 സ്വന്തമായി ശേഖരിക്കാവുന്ന തുക (രൂപ)
                 </label>
                 <input
-                style={{ fontFamily: "Anek Malayalam Variable" }}
+                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   type="number"
                   name="ownContribution"
                   value={formData.ownContribution}
@@ -426,14 +478,14 @@ const MosqueFundForm = () => {
 
         {/* Welfare Fund Details */}
         <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>കോൺടാക്റ്റ് വിവരങ്ങൾ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി
               </label>
               <input
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 type="text"
                 name="mosqueOfficialName"
                 value={formData.mosqueOfficialName}
@@ -443,30 +495,34 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഫോൺ
               </label>
               <input
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 type="tel"
                 name="mosqueOfficialPhone"
                 value={formData.mosqueOfficialPhone}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mosqueOfficialPhone ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 വാട്സാപ്പ് നമ്പർ
               </label>
               <input
-              style={{ fontFamily: "Anek Malayalam Variable" }}
+               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 type="tel"
                 name="whatsappNumber"
                 value={formData.whatsappNumber}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.whatsappNumber ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
             </div>
           </div>
@@ -474,10 +530,10 @@ const MosqueFundForm = () => {
 
         {/* Required Documents */}
         <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ആവശ്യമായ ഡോക്യുമെന്റുകൾ</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ബാങ്ക് പാസ് ബുക്കിന്റെ കോപ്പി (അക്കൗണ്ട് നമ്പർ, അക്കൗണ്ട് ഹോൾഡറുടെ പേര് ഉള്ള ഭാഗം)
               </label>
               <textarea
@@ -490,7 +546,7 @@ const MosqueFundForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               പ്ലാൻ, എസ്റ്റിമേറ്റ് വിവരങ്ങൾ
               </label>
               <textarea
@@ -507,7 +563,7 @@ const MosqueFundForm = () => {
 
         {/* Declarations */}
         <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Anek Malayalam Variable" }}>പ്രഖ്യാപനങ്ങൾ</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>പ്രഖ്യാപനങ്ങൾ</h2>
           <div className="space-y-4">
             <label className="flex items-start space-x-3">
               <input
@@ -518,7 +574,7 @@ const MosqueFundForm = () => {
                 className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 required
               />
-              <span className="text-sm text-gray-700"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <span className="text-sm text-gray-700" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ഞാൻ മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള എല്ലാ നിർദേശങ്ങളും വായിച്ച് മനസ്സിലാക്കിയുണ്ട്.
               </span>
             </label>
@@ -531,7 +587,7 @@ const MosqueFundForm = () => {
                 className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 required
               />
-              <span className="text-sm text-gray-700"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <span className="text-sm text-gray-700" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
               ഞാൻ ഇവിടെ നൽകിയിരിക്കുന്ന എല്ലാ വിവരങ്ങളും സത്യവും കൃത്യവുമാണെന്ന് പ്രഖ്യാപിക്കുന്നു. തെറ്റായ വിവരങ്ങൾ നൽകിയാൽ അതിന്റെ പൂർണ്ണ ഉത്തരവാദിത്തം എന്റേതായിരിക്കും.
               </span>
             </label>
@@ -541,7 +597,7 @@ const MosqueFundForm = () => {
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-4">
           <button
-          style={{ fontFamily: "Anek Malayalam Variable" }}
+           style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             type="button"
             onClick={() => setShowForm(false)}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200"
@@ -549,7 +605,7 @@ const MosqueFundForm = () => {
             റദ്ദാക്കുക
           </button>
           <button
-          style={{ fontFamily: "Anek Malayalam Variable" }}
+           style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             type="button"
             onClick={handleSubmit}
             className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"

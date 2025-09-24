@@ -37,18 +37,69 @@ const MedicalAidForm = () => {
     mosquePhone: ''
   });
 
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const validateField = (fieldName, value) => {
+    let isValid = true;
+    
+    if (['phone', 'whatsapp', 'presidentPhone', 'mosquePhone'].includes(fieldName)) {
+      if (value && !validateMobileNumber(value)) {
+        isValid = false;
+      }
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [fieldName]: !isValid
+    }));
+    
+    return isValid;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    validateField(name, value);
   };
   const navigate = useNavigate();
 
 
+  const validateMobileNumber = (number) => {
+    const mobileRegex = /^[0-9]{10}$/;
+    return mobileRegex.test(number);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Mobile number validation
+    if (formData.phone && !validateMobileNumber(formData.phone)) {
+      alert("ദയവായി സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (formData.whatsapp && !validateMobileNumber(formData.whatsapp)) {
+      alert("ദയവായി സാധുവായ 10 അക്ക വാട്സാപ്പ് നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (formData.presidentPhone && !validateMobileNumber(formData.presidentPhone)) {
+      alert("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ 10 അക്ക ഫോൺ നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (formData.mosquePhone && !validateMobileNumber(formData.mosquePhone)) {
+      alert("ദയവായി മസ്ജിദ് ഉദ്യോഗസ്ഥന്റെ സാധുവായ 10 അക്ക ഫോൺ നമ്പർ നൽകുക");
+      return;
+    }
     
     try {
       const response = await fetch('http://localhost:5000/api/welfarefund/create', {
@@ -299,7 +350,9 @@ const MedicalAidForm = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
@@ -313,7 +366,9 @@ const MedicalAidForm = () => {
                 name="whatsapp"
                 value={formData.whatsapp}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.whatsapp ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
             </div>
             <div>
@@ -326,7 +381,9 @@ const MedicalAidForm = () => {
                 name="presidentPhone"
                 value={formData.presidentPhone}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.presidentPhone ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
             </div>
             <div>
@@ -577,7 +634,9 @@ const MedicalAidForm = () => {
                 name="mosquePhone"
                 value={formData.mosquePhone}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mosquePhone ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>

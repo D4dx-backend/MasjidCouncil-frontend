@@ -73,6 +73,8 @@ const AffiliationForm = () => {
     followsOutstateProcedures: "",
   });
 
+  const [validationErrors, setValidationErrors] = useState({});
+
   const facilities = [
     "മദ്രസ",
     "റീഡിംഗ് റൂം",
@@ -117,6 +119,7 @@ const AffiliationForm = () => {
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    validateField(field, value);
   };
 
   const handleNestedInputChange = (parent, field, value) => {
@@ -124,6 +127,7 @@ const AffiliationForm = () => {
       ...prev,
       [parent]: { ...prev[parent], [field]: value },
     }));
+    validateField(`${parent}.${field}`, value);
   };
 
   const handleCheckboxChange = (field, value) => {
@@ -168,20 +172,120 @@ const AffiliationForm = () => {
     }));
   };
 
+  const validateMobileNumber = (number) => {
+    const mobileRegex = /^[0-9]{10}$/;
+    return mobileRegex.test(number);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateField = (fieldName, value) => {
+    let isValid = true;
+
+    if (
+      fieldName === "phone" ||
+      fieldName === "president.mobile" ||
+      fieldName === "secretary.mobile"
+    ) {
+      if (value && !validateMobileNumber(value)) {
+        isValid = false;
+      }
+    }
+
+    if (
+      fieldName === "email" ||
+      fieldName === "president.email" ||
+      fieldName === "secretary.email"
+    ) {
+      if (value && !validateEmail(value)) {
+        isValid = false;
+      }
+    }
+
+    setValidationErrors((prev) => ({
+      ...prev,
+      [fieldName]: !isValid,
+    }));
+
+    return isValid;
+  };
+
   const handleSubmit = async () => {
     console.log("Form submission started...");
     console.log("Form data:", formData);
 
-    // Basic validation
-    // if (!formData.mosqueName || !formData.mosqueAddress || !formData.localityAddress || !formData.yearStarted) {
-    //   alert("ദയവായി എല്ലാ അടിസ്ഥാന വിവരങ്ങളും പൂരിപ്പിക്കുക");
-    //   return;
-    // }
+    // Mobile number validation
+    if (formData.phone && !validateMobileNumber(formData.phone)) {
+      alert("ദയവായി സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      return;
+    }
 
-    // if (!formData.completeAddress || !formData.district || !formData.pincode || !formData.phone || !formData.email) {
-    //   alert("ദയവായി എല്ലാ വിലാസ വിവരങ്ങളും പൂരിപ്പിക്കുക");
-    //   return;
-    // }
+    if (
+      formData.president.mobile &&
+      !validateMobileNumber(formData.president.mobile)
+    ) {
+      alert("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      return;
+    }
+
+    if (
+      formData.secretary.mobile &&
+      !validateMobileNumber(formData.secretary.mobile)
+    ) {
+      alert("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      return;
+    }
+
+    // Email validation
+    if (formData.email && !validateEmail(formData.email)) {
+      alert("ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      return;
+    }
+
+    if (formData.president.email && !validateEmail(formData.president.email)) {
+      alert("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      return;
+    }
+
+    if (formData.secretary.email && !validateEmail(formData.secretary.email)) {
+      alert("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      return;
+    }
+
+    // Basic validation - Required fields
+    if (
+      !formData.mosqueName ||
+      !formData.mosqueAddress ||
+      !formData.localityAddress ||
+      !formData.yearStarted
+    ) {
+      alert("ദയവായി എല്ലാ അടിസ്ഥാന വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      return;
+    }
+
+    if (
+      !formData.completeAddress ||
+      !formData.district ||
+      !formData.pincode ||
+      !formData.phone
+    ) {
+      alert("ദയവായി എല്ലാ വിലാസ വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      return;
+    }
+
+    // Additional validation for committee details
+    if (!formData.committeeType) {
+      alert("ദയവായി മാനേജിംഗ് കമ്മിറ്റിയുടെ തരം തിരഞ്ഞെടുക്കുക");
+      return;
+    }
+
+    if (!formData.president.name || !formData.secretary.name) {
+      alert("ദയവായി പ്രസിഡന്റിന്റെയും സെക്രട്ടറിയുടെയും പേര് നൽകുക");
+      return;
+    }
 
     try {
       console.log(
@@ -480,13 +584,17 @@ const AffiliationForm = () => {
                     className="block text-sm font-medium mb-2"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    ഫോൺ (കോഡ് സഹിതം)
+                    ഫോൺ നമ്പർ 
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationErrors.phone
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
                 </div>
               </div>
@@ -502,7 +610,11 @@ const AffiliationForm = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationErrors.email
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
                 </div>
                 <div>
@@ -575,7 +687,10 @@ const AffiliationForm = () => {
             >
               7. പള്ളിയോടനുബന്ധിച്ച ഇതര സംവിധാനങ്ങൾ
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 " style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 gap-2 "
+              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+            >
               {facilities.map((facility) => (
                 <label key={facility} className="flex items-center space-x-2">
                   <input
@@ -1068,7 +1183,11 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors["president.mobile"]
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                     <input
                       type="email"
@@ -1081,7 +1200,11 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors["president.email"]
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                   </div>
                 </div>
@@ -1118,7 +1241,11 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors["secretary.mobile"]
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                     <input
                       type="email"
@@ -1131,7 +1258,11 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors["secretary.email"]
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                   </div>
                 </div>
