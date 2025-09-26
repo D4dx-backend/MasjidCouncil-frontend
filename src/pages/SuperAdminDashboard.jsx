@@ -343,51 +343,51 @@ const SuperAdminDashboard = () => {
 
       <div className="p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-6 shadow-sm border border-emerald-100">
-              <Shield className="w-10 h-10 text-emerald-600" />
+          {/* Professional Header Section */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Super Admin Dashboard</h1>
+                <p className="text-gray-600">Manage admins and monitor system activities</p>
+              </div>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
-              സൂപ്പർ അഡ്മിൻ ഡാഷ്‌ബോർഡ്
-            </h1>
-            <p className="text-gray-600 text-xl font-normal">
-              Super Admin Dashboard
-            </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 mb-1">Total Admins</p>
-                  <p className="text-3xl font-bold text-gray-900">{admins.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{admins.length}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-emerald-600" />
+                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-600" />
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 mb-1">Districts Covered</p>
-                  <p className="text-3xl font-bold text-gray-900">{uniqueDistricts.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{uniqueDistricts.length}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-blue-600" />
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-blue-600" />
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 mb-1">Areas Managed</p>
-                  <p className="text-3xl font-bold text-gray-900">{uniqueAreas.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{uniqueAreas.length}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
             </div>
@@ -399,11 +399,11 @@ const SuperAdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => navigate('/superadmin-affiliation-list')}
-                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+                className="group bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all text-left"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                    <Users className="w-6 h-6 text-emerald-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                    <Users className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Affiliation</h3>
@@ -414,11 +414,11 @@ const SuperAdminDashboard = () => {
 
               <button
                 onClick={() => navigate('/superadmin-medical-list')}
-                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+                className="group bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all text-left"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                    <Shield className="w-6 h-6 text-blue-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <Shield className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Medical Aid</h3>
@@ -429,11 +429,11 @@ const SuperAdminDashboard = () => {
 
               <button
                 onClick={() => navigate('/superadmin-mosque-fund-list')}
-                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+                className="group bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all text-left"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                    <Users className="w-6 h-6 text-purple-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                    <Users className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Mosque Fund</h3>
@@ -460,13 +460,13 @@ const SuperAdminDashboard = () => {
           )}
 
           {/* Admin Management Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Section Header */}
-            <div className="px-6 py-4 border-b border-gray-100">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Admin Management</h2>
-                  <p className="text-sm text-gray-500 mt-1">Manage and monitor admin accounts</p>
+                  <h2 className="text-lg font-semibold text-gray-900">Admin Management</h2>
+                  <p className="text-sm text-gray-500">Manage and monitor admin accounts</p>
                 </div>
                 <button
                   onClick={openCreateModal}
@@ -479,7 +479,7 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Search and Filters */}
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+            <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 max-w-md">
                   <div className="relative">
@@ -494,16 +494,16 @@ const SuperAdminDashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center text-sm font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center text-sm font-medium px-3 py-1.5 rounded-md bg-emerald-100 text-emerald-800">
                     {filteredAdmins.length} admins
                   </span>
                   {searchTerm && (
-                    <button
+                <button
                       onClick={() => setSearchTerm('')}
                       className="px-3 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
+                >
                       Clear
-                    </button>
+                </button>
                   )}
                 </div>
               </div>
@@ -579,12 +579,12 @@ const SuperAdminDashboard = () => {
             </div>
 
             {filteredAdmins.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-gray-400" />
+              <div className="text-center py-12">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-6 w-6 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No admins found</h3>
-                <p className="text-gray-500">
+                <h3 className="text-base font-medium text-gray-900 mb-2">No admins found</h3>
+                <p className="text-gray-500 text-sm">
                   {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first admin.'}
                 </p>
               </div>
@@ -600,11 +600,11 @@ const SuperAdminDashboard = () => {
             <div className="flex items-center justify-center mb-6">
               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
                 <Shield className="h-6 w-6 text-emerald-600" />
+                </div>
               </div>
-            </div>
             <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">
-              {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
-            </h3>
+                {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
+              </h3>
                
                <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -700,32 +700,32 @@ const SuperAdminDashboard = () => {
           <div className="relative top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
             <div className="flex items-center justify-center mb-6">
               <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-                <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
+                  <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
               </div>
-            </div>
-            
+              
             <h3 className="text-xl font-semibold text-gray-900 text-center mb-2">
-              Confirm Logout
-            </h3>
+                Confirm Logout
+              </h3>
             <p className="text-gray-500 text-center mb-8">
-              Are you sure you want to logout? You will need to login again to access the dashboard.
-            </p>
-            
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={cancelLogout}
+                Are you sure you want to logout? You will need to login again to access the dashboard.
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelLogout}
                 className="px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
                 className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-              >
-                Logout
-              </button>
+                >
+                  Logout
+                </button>
             </div>
           </div>
         </div>

@@ -87,222 +87,227 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
-        {/* Header */}
-        <div className="bg-blue-700 text-white p-6 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Professional Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
               <button 
                 onClick={onBack}
-                className="p-2 hover:bg-blue-600 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <div>
-                <h1 className="text-2xl font-bold">ഇമാം മൗഅ്‌ദിൻ കക്ഷമനിദി - സൂപ്പർ അഡ്മിൻ</h1>
-                <p className="text-blue-100">Imam Muazzin Medical Aid Fund - Super Admin View</p>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Download className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Medical Aid Application Details</h1>
+                  <p className="text-gray-600">Review and manage medical aid application</p>
+                </div>
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button 
                 onClick={onEdit}
-                className="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Edit className="w-4 h-4" />
-                എഡിറ്റ്
+                Edit
               </button>
               <button 
                 onClick={handlePrint}
-                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400 transition-colors"
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Printer className="w-4 h-4" />
-                പ്രിന്റ്
+                Print
               </button>
               <button 
                 onClick={handleDownload}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-500 transition-colors"
+                className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 <Download className="w-4 h-4" />
-                ഡൗൺലോഡ്
+                Download
               </button>
             </div>
           </div>
         </div>
 
-        <div className="p-8 space-y-8">
+        <div className="space-y-6">
           {/* Application Summary */}
-          <section className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷാ സംഗ്രഹം</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Application Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">അപേക്ഷാ നമ്പർ</label>
+                <label className="text-sm font-medium text-gray-500">Application ID</label>
                 <p className="text-lg font-bold text-blue-600">{formData.applicationId}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">സമർപ്പിച്ച തീയതി</label>
+                <label className="text-sm font-medium text-gray-500">Submission Date</label>
                 <p className="text-lg font-medium text-gray-900">{formData.submissionDate}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">അപേക്ഷയുടെ നിലവിലെ അവസ്ഥ</label>
+                <label className="text-sm font-medium text-gray-500">Status</label>
                 <div className="mt-1">{getStatusBadge(formData.status)}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ആവശ്യപ്പെടുന്ന തുക</label>
+                <label className="text-sm font-medium text-gray-500">Requested Amount</label>
                 <p className="text-lg font-bold text-red-600">₹{formData.requestedAmount}</p>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Mosque Information */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്ജിദ് വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">മസ്ജിദിന്റെ പേര്</label>
+                <label className="text-sm font-medium text-gray-500">Mosque Name</label>
                 <p className="text-lg font-medium text-gray-900">{formData.mosqueName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">MCK അഫിലിയേഷൻ നമ്പർ</label>
+                <label className="text-sm font-medium text-gray-500">MCK Affiliation Number</label>
                 <p className="text-lg font-medium text-gray-900">{formData.mckAffiliation}</p>
               </div>
             </div>
             <div className="mt-4">
-              <label className="text-sm font-medium text-gray-600">വിലാസം</label>
+              <label className="text-sm font-medium text-gray-500">Address</label>
               <p className="text-gray-900 whitespace-pre-wrap">{formData.address}</p>
             </div>
-          </section>
+          </div>
 
           {/* Management Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മാനേജ്മെന്റ് വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Management Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">പരിപാലന കമ്മിറ്റി പ്രസിഡന്റ്</label>
+                <label className="text-sm font-medium text-gray-500">Committee President</label>
                 <p className="text-gray-900">{formData.committeePerson}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">മാനേജ്മെന്റ് തരം</label>
+                <label className="text-sm font-medium text-gray-500">Management Type</label>
                 <p className="text-gray-900">{formData.managementType}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ഫോൺ</label>
+                <label className="text-sm font-medium text-gray-500">Phone</label>
                 <p className="text-gray-900">{formData.phone}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">വാട്സ്ആപ്പ്</label>
+                <label className="text-sm font-medium text-gray-500">WhatsApp</label>
                 <p className="text-gray-900">{formData.whatsapp}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പ്രസിഡന്റ് ഫോൺ</label>
+                <label className="text-sm font-medium text-gray-500">President Phone</label>
                 <p className="text-gray-900">{formData.presidentPhone}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">പ്രസിഡന്‍റ്/ചെയർമാൻ</label>
+                <label className="text-sm font-medium text-gray-500">President/Chairman</label>
                 <p className="text-gray-900">{formData.presidentChairman}</p>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Jamaat Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Jamaat Islami Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">ജമാഅത്തിന്റെ പ്രാദേശിക ഘടകം</label>
+                <label className="text-sm font-medium text-gray-500">Jamaat Unit</label>
                 <p className="text-gray-900">{formData.jammatDetails}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ഏരിയ</label>
+                <label className="text-sm font-medium text-gray-500">Area</label>
                 <p className="text-gray-900">{formData.area}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ജില്ല</label>
+                <label className="text-sm font-medium text-gray-500">District</label>
                 <p className="text-gray-900">{formData.district}</p>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Applicant Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">അപേക്ഷ വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Applicant Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">അപേക്ഷ സമർപ്പിക്കുന്നത് ആർക്കാണ് വേണ്ടി</label>
+                  <label className="text-sm font-medium text-gray-500">Application For</label>
                   <p className="text-lg font-medium text-gray-900">{formData.applicantDetails}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">ജോലി ചെയ്യുന്ന തസ്‌തിക</label>
+                  <label className="text-sm font-medium text-gray-500">Position</label>
                   <p className="text-gray-900">{formData.chairmanDesignation}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">വേതനം</label>
+                  <label className="text-sm font-medium text-gray-500">Salary</label>
                   <p className="text-lg font-medium text-green-600">₹{formData.salary}</p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Help Request Details */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">സഹായാഭ്യർത്ഥന വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Help Request Details</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">സഹായത്തിന്റെ ഉദ്ദേശ്യം</label>
+                <label className="text-sm font-medium text-gray-500">Purpose of Help</label>
                 <p className="text-lg font-medium text-blue-600">{formData.helpPurpose}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">ആവശ്യത്തിന്റെ വിശദവിവരം</label>
+                <label className="text-sm font-medium text-gray-500">Detailed Description</label>
                 <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{formData.needDescription}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-600">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
+                  <label className="text-sm font-medium text-gray-500">Expected Expense</label>
                   <p className="text-xl font-bold text-red-600">₹{formData.expectedExpense}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-600">സ്വന്തം സംഭാവന</label>
+                  <label className="text-sm font-medium text-gray-500">Own Contribution</label>
                   <p className="text-xl font-bold text-green-600">₹{formData.ownContribution}</p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Previous Help */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മുമ്പത്തെ സഹായം</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Previous Help</h2>
             <div>
-              <label className="text-sm font-medium text-gray-600">MCK യിൽ നിന്ന് മുമ്പ് സഹായം ലഭിച്ചിട്ടുണ്ടോ?</label>
+              <label className="text-sm font-medium text-gray-500">Previous Help from MCK</label>
               <p className="text-lg font-medium text-gray-900">{formData.previousHelp}</p>
             </div>
-          </section>
+          </div>
 
           {/* Mosque Officials */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Officials</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-medium mb-3 text-blue-800">പ്രസിഡന്‍റ് / സെക്രട്ടറി</h3>
+                <h3 className="font-medium mb-3 text-blue-800">President / Secretary</h3>
                 <div className="space-y-2">
-                  <p><span className="text-sm text-gray-600">പേര്:</span> {formData.mosquePresident}</p>
-                  <p><span className="text-sm text-gray-600">ഫോൺ:</span> {formData.mosquePhone}</p>
+                  <p><span className="text-sm text-gray-500">Name:</span> {formData.mosquePresident}</p>
+                  <p><span className="text-sm text-gray-500">Phone:</span> {formData.mosquePhone}</p>
                 </div>
               </div>
               <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-medium mb-3 text-green-800">അടിയന്തിര ബന്ധം</h3>
+                <h3 className="font-medium mb-3 text-green-800">Emergency Contact</h3>
                 <div className="space-y-2">
-                  <p><span className="text-sm text-gray-600">പേര്:</span> {formData.emergencyContact}</p>
-                  <p><span className="text-sm text-gray-600">ഫോൺ:</span> {formData.emergencyPhone}</p>
+                  <p><span className="text-sm text-gray-500">Name:</span> {formData.emergencyContact}</p>
+                  <p><span className="text-sm text-gray-500">Phone:</span> {formData.emergencyPhone}</p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Required Documents Checklist */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Required Documents</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -310,7 +315,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">ജീവനക്കാരന്റെ ആധാർ കോപ്പി</span>
+                <span className="text-gray-900">Employee Aadhaar Copy</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -318,7 +323,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</span>
+                <span className="text-gray-900">Mosque Bank Passbook Copy</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -326,7 +331,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</span>
+                <span className="text-gray-900">House Repair Estimate</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -334,31 +339,31 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-gray-900">വീടിന്റെ ഫോട്ടോകൾ</span>
+                <span className="text-gray-900">House Photos</span>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Super Admin Actions */}
-          <section className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">സൂപ്പർ അഡ്മിൻ പ്രവർത്തനങ്ങൾ</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Super Admin Actions</h2>
             <div className="flex justify-between mt-4">
               <button 
                 onClick={handleApprove}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md shadow transition-colors"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
               >
                 <CheckCircle className="w-5 h-5" />
-                അനുമതി നൽകുക
+                Approve Application
               </button>
               <button 
                 onClick={handleReject}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-md shadow transition-colors"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
               >
                 <XCircle className="w-5 h-5" />
-                നിരസിക്കുക
+                Reject Application
               </button>
             </div>
-          </section>
+          </div>
         </div>
       </div>
     </div>
