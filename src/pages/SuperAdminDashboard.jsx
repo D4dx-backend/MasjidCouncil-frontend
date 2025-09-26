@@ -324,63 +324,163 @@ const SuperAdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
+  // Derived stats
+  const uniqueDistricts = Array.from(new Set(admins.map(a => (a.district || '').trim()).filter(Boolean)));
+  const uniqueAreas = Array.from(new Set(admins.map(a => (a.area || '').trim()).filter(Boolean)));
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen bg-gray-50">
       <SuperAdminNavbar />
 
-      <div className="p-4 sm:p-6">
+      <div className="p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-              <Shield className="w-8 h-8 text-white" />
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-6 shadow-sm border border-emerald-100">
+              <Shield className="w-10 h-10 text-emerald-600" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-blue-800 mb-2">
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3" style={{ fontFamily: "Anek Malayalam Variable" }}>
               സൂപ്പർ അഡ്മിൻ ഡാഷ്‌ബോർഡ്
             </h1>
-            <p className="text-blue-600 text-lg font-medium">
-              Super Admin Dashboard - Manage Admins
+            <p className="text-gray-600 text-xl font-normal">
+              Super Admin Dashboard
             </p>
-            <div className="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Total Admins</p>
+                  <p className="text-3xl font-bold text-gray-900">{admins.length}</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-emerald-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Districts Covered</p>
+                  <p className="text-3xl font-bold text-gray-900">{uniqueDistricts.length}</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Areas Managed</p>
+                  <p className="text-3xl font-bold text-gray-900">{uniqueAreas.length}</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                onClick={() => navigate('/superadmin-affiliation-list')}
+                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                    <Users className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Affiliation</h3>
+                    <p className="text-sm text-gray-500">Manage applications</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => navigate('/superadmin-medical-list')}
+                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <Shield className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Medical Aid</h3>
+                    <p className="text-sm text-gray-500">Process requests</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => navigate('/superadmin-mosque-fund-list')}
+                className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                    <Users className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Mosque Fund</h3>
+                    <p className="text-sm text-gray-500">Approve applications</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Alerts */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md flex items-center">
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
               <AlertCircle className="h-5 w-5 mr-2" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center">
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               {success}
             </div>
           )}
 
-          {/* Main Content Card */}
-          <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-blue-100">
-            {/* Card Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-              <h2 className="text-xl font-semibold text-white flex items-center">
-                <Users className="w-6 h-6 mr-3" />
-                അഡ്മിൻ മാനേജ്മെന്റ് | Admin Management
-              </h2>
+          {/* Admin Management Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Section Header */}
+            <div className="px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">Admin Management</h2>
+                  <p className="text-sm text-gray-500 mt-1">Manage and monitor admin accounts</p>
+                </div>
+                <button
+                  onClick={openCreateModal}
+                  className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Admin
+                </button>
+              </div>
             </div>
 
-            {/* Actions Bar */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Search and Filters */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 max-w-md">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -389,48 +489,54 @@ const SuperAdminDashboard = () => {
                       placeholder="Search admins..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
                     />
                   </div>
                 </div>
-                <button
-                  onClick={openCreateModal}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Admin
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center text-sm font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {filteredAdmins.length} admins
+                  </span>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="px-3 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Admins Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-blue-50">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Username
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Phone Number
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       District
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Area
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredAdmins.map((admin) => (
-                    <tr key={admin._id} className="hover:bg-blue-50 transition-colors duration-200">
+                  {filteredAdmins.map((admin, idx) => (
+                    <tr key={admin._id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{admin.username}</div>
                       </td>
@@ -452,14 +558,14 @@ const SuperAdminDashboard = () => {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleEdit(admin)}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100 transition-colors"
+                            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-lg hover:bg-emerald-50 transition-colors"
                             title="Edit Admin"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(admin._id)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100 transition-colors"
+                            className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
                             title="Delete Admin"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -473,9 +579,9 @@ const SuperAdminDashboard = () => {
             </div>
 
             {filteredAdmins.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-blue-600" />
+              <div className="text-center py-16">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No admins found</h3>
                 <p className="text-gray-500">
@@ -483,72 +589,56 @@ const SuperAdminDashboard = () => {
                 </p>
               </div>
             )}
-
-            {/* Card Footer */}
-            <div className="bg-blue-50 px-6 py-4 border-t border-blue-200">
-              <div className="flex items-center justify-between text-sm text-blue-700">
-                <div className="flex items-center">
-                  <Users className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Total Admins: {filteredAdmins.length}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-medium">Click edit/delete to manage admins</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600/60 backdrop-blur-md overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white/90 backdrop-blur-lg border-white/20">
-            <div className="mt-3">
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                </div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <Shield className="h-6 w-6 text-emerald-600" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 text-center mb-4">
-                {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
-              </h3>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">
+              {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
+            </h3>
                
-               
-               <form onSubmit={handleSubmit} className="space-y-4">
+               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
                   <input
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     required
                   />
                 </div>
 
                  <div>
-                   <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                    <input
                      type="text"
                      name="phoneNumber"
                      value={formData.phoneNumber}
                      onChange={handleInputChange}
-                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                      placeholder="Enter 10-digit mobile number"
                      required
                    />
                  </div>
 
-
                  <div>
-                   <label className="block text-sm font-medium text-gray-700">District</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
                    <select
                      name="district"
                      value={formData.district}
                      onChange={handleInputChange}
-                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                      required
                      disabled={loadingDropdowns}
                    >
@@ -562,14 +652,14 @@ const SuperAdminDashboard = () => {
                  </div>
 
                  <div>
-                   <label className="block text-sm font-medium text-gray-700">
+                   <label className="block text-sm font-medium text-gray-700 mb-2">
                      Area {!formData.district && <span className="text-gray-500">(Select district first)</span>}
                    </label>
                    <select
                      name="area"
                      value={formData.area}
                      onChange={handleInputChange}
-                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                      required
                      disabled={loadingDropdowns || !formData.district}
                    >
@@ -584,62 +674,58 @@ const SuperAdminDashboard = () => {
                    </select>
                  </div>
 
-
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                   >
                     {editingAdmin ? 'Update' : 'Create'}
                   </button>
                 </div>
               </form>
-            </div>
           </div>
         </div>
       )}
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-gray-600/60 backdrop-blur-md overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white/90 backdrop-blur-lg border-white/20">
-            <div className="mt-3">
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-red-100 p-3 rounded-full">
-                  <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+                <svg className="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
               </div>
-              
-              <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
-                Confirm Logout
-              </h3>
-              <p className="text-sm text-gray-500 text-center mb-6">
-                Are you sure you want to logout? You will need to login again to access the dashboard.
-              </p>
-              
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={cancelLogout}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmLogout}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+            </div>
+            
+            <h3 className="text-xl font-semibold text-gray-900 text-center mb-2">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-500 text-center mb-8">
+              Are you sure you want to logout? You will need to login again to access the dashboard.
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelLogout}
+                className="px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
