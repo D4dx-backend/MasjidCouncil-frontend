@@ -366,3 +366,4 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
 };
 
 export default SuperAdminMedicalAidDetails;
+

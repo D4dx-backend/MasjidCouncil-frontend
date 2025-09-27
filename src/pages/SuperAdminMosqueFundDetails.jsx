@@ -287,3 +287,4 @@ const SuperAdminMosqueFundDetails = ({ onBack, onEdit }) => {
 };
 
 export default SuperAdminMosqueFundDetails;
+

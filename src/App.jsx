@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from './components/Navbar';
 import AdminNavbar from './components/AdminNavbar';
 import Home from './pages/Home';
+import About from './pages/About';
 import AffiliationForm from './pages/AffiliationForm';
 import MedicalAidForm from './pages/MedicalAidForm';
 import MosqueFundForm from './pages/MosqueFundForm';
@@ -50,16 +51,24 @@ const Layout = () => {
     '/superadmin-mosque-fund-details'
   ];
 
+  const formRoutes = [
+    '/affiliation',
+    '/medical-aid',
+    '/mosque-fund'
+  ];
+
   const isAdminRoute = adminRoutes.includes(location.pathname);
   const isSuperAdminRoute = superAdminRoutes.includes(location.pathname);
+  const isFormRoute = formRoutes.includes(location.pathname);
   const isAdminLogin = location.pathname === '/admin-login';
   const isSuperAdminLogin = location.pathname === '/superadmin-login';
 
   return (
     <>
-      {!isAdminLogin && !isSuperAdminLogin && (isAdminRoute ? <AdminNavbar /> : isSuperAdminRoute ? null : <Navbar />)}
+      {!isAdminLogin && !isSuperAdminLogin && !isFormRoute && (isAdminRoute ? <AdminNavbar /> : isSuperAdminRoute ? null : <Navbar />)}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/affiliation" element={<AffiliationForm />} />
         <Route path="/medical-aid" element={<MedicalAidForm />} />
         <Route path="/mosque-fund" element={<MosqueFundForm />} />

@@ -35,23 +35,23 @@ const AdminHome = () => {
     <div className={`bg-white rounded-lg p-4 shadow-md border-l-4 ${color}`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm">{title}</p>
-          <p className="text-2xl font-bold text-gray-800">{value}</p>
+          <p className="text-green-600 text-sm">{title}</p>
+          <p className="text-2xl font-bold text-green-800">{value}</p>
         </div>
-        <Icon className="w-8 h-8 text-gray-400" />
+        <Icon className="w-8 h-8 text-green-400" />
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6" style={{ fontFamily: "Anek Malayalam Variable" }}>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-6" style={{ fontFamily: "Anek Malayalam Variable" }}>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800 mb-3">
+          <h1 className="text-4xl font-bold text-green-800 mb-3">
             അഡ്മിൻ ഡാഷ്‌ബോർഡ്
           </h1>
-          <p className="text-gray-600">മസ്ജിദ് കൗൺസിൽ കേരള - അപേക്ഷകളുടെ സമഗ്ര നിയന്ത്രണം</p>
+          <p className="text-green-600">മസ്ജിദ് കൗൺസിൽ കേരള - അപേക്ഷകളുടെ സമഗ്ര നിയന്ത്രണം</p>
           <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-green-600 mx-auto mt-3 rounded-full"></div>
         </div>
 

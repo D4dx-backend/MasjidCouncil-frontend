@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const SuperAdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -55,16 +56,15 @@ const SuperAdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="max-w-sm w-full bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4 text-center">Super Admin Login</h2>
-
-        <div className="flex flex-col items-center mb-4">
-          <div className="bg-blue-100 p-4 rounded-full">
-            <Shield className="h-8 w-8 text-blue-500" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+      <div className="max-w-sm w-full bg-white p-6 rounded-2xl shadow-2xl border border-blue-100">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <img src={logo} alt="Masjid Council Kerala" className="h-16 object-contain" />
           </div>
-          <h3 className="text-lg font-semibold mt-2">Super Admin Login</h3>
-          <p className="text-sm text-gray-500">സൂപ്പർ അഡ്മിൻ ലോഗിൻ</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Super Admin Login</h1>
+          <p className="text-gray-600">സൂപ്പർ അഡ്മിൻ ലോഗിൻ</p>
+          <div className="w-16 h-1 bg-blue-500 mx-auto mt-3 rounded-full"></div>
         </div>
 
         {error && (
@@ -125,16 +125,6 @@ const SuperAdminLogin = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-
-        <div className="bg-blue-50 p-4 rounded-md mt-6 text-blue-700 text-sm">
-          <h4 className="font-semibold mb-2">Super Admin Access:</h4>
-          <ul className="list-disc ml-5 space-y-1">
-            <li>Full system administration</li>
-            <li>Create and manage admins</li>
-            <li>View all system data</li>
-            <li>System configuration</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
