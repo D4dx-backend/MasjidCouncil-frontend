@@ -74,7 +74,7 @@ const SuperAdminNavbar = () => {
 
   return (
     <>
-      <nav className="bg-blue-800 shadow-lg">
+      <nav className="bg-emerald-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {/* Left side - Logo */}
@@ -82,7 +82,7 @@ const SuperAdminNavbar = () => {
               <Shield className="h-8 w-8 text-white mr-3" />
               <div>
                 <h1 className="text-white text-xl font-bold">Super Admin Panel</h1>
-                <p className="text-blue-100 text-xs">Masjid Council Kerala</p>
+                <p className="text-emerald-100 text-xs">Masjid Council Kerala</p>
               </div>
             </div>
 
@@ -96,8 +96,8 @@ const SuperAdminNavbar = () => {
                     onClick={() => handleNavigation(item.path)}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md transition duration-200 ${
                       isActive(item.path)
-                        ? 'bg-blue-700 text-white'
-                        : 'text-blue-100 hover:text-white hover:bg-blue-700'
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'text-emerald-100 hover:text-white hover:bg-emerald-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -122,7 +122,7 @@ const SuperAdminNavbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMobileMenu}
-                className="text-white hover:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded-md"
+                className="text-white hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 p-2 rounded-md"
                 aria-label="Toggle mobile menu"
               >
                 {isMobileMenuOpen ? (
@@ -136,7 +136,7 @@ const SuperAdminNavbar = () => {
 
           {/* Mobile menu - Visible only when open */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-blue-700">
+            <div className="md:hidden border-t border-emerald-700">
               <div className="px-2 pt-2 pb-3 space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -144,21 +144,21 @@ const SuperAdminNavbar = () => {
                     <button
                       key={item.path}
                       onClick={() => handleNavigation(item.path)}
-                      className={`flex items-center space-x-3 text-white hover:text-blue-200 hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left ${
-                        isActive(item.path) ? 'bg-blue-700 text-white' : ''
+                      className={`flex items-center space-x-3 text-white hover:text-emerald-200 hover:bg-emerald-700 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left ${
+                        isActive(item.path) ? 'bg-emerald-700 text-white' : ''
                       }`}
                     >
                       <Icon className="w-5 h-5" />
                       <div>
                         <div className="font-medium">{item.label}</div>
-                        <div className="text-xs text-blue-200">{item.description}</div>
+                        <div className="text-xs text-emerald-200">{item.description}</div>
                       </div>
                     </button>
                   );
                 })}
                 
                 {/* Mobile Logout */}
-                <div className="border-t border-blue-700 pt-4 mt-4">
+                <div className="border-t border-emerald-700 pt-4 mt-4">
                   <button
                     onClick={handleLogout}
                     className="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-md transition duration-200 w-full font-medium"

@@ -56,75 +56,104 @@ const SuperAdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
-      <div className="max-w-sm w-full bg-white p-6 rounded-2xl shadow-2xl border border-blue-100">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 lg:p-8">
+      <div className="max-w-md w-full">
+        {/* Professional Header Section */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="Masjid Council Kerala" className="h-16 object-contain" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Super Admin Login</h1>
-          <p className="text-gray-600">സൂപ്പർ അഡ്മിൻ ലോഗിൻ</p>
-          <div className="w-16 h-1 bg-blue-500 mx-auto mt-3 rounded-full"></div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter username"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter password"
-                required
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
+          <div className="flex items-center justify-center space-x-4 mb-6">
+            <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Super Admin Login</h1>
+              <p className="text-gray-600">Access the administrative panel</p>
             </div>
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2 rounded-md transition-colors"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-500 mb-2">
+                Username
+              </label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                placeholder="Enter username"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-500 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  placeholder="Enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 rounded-lg transition-colors"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+
+          <div className="bg-emerald-50 p-6 rounded-lg mt-6">
+            <h4 className="font-semibold mb-3 text-emerald-800">Super Admin Access:</h4>
+            <ul className="space-y-2 text-sm text-emerald-700">
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
+                Full system administration
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
+                Create and manage admins
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
+                View all system data
+              </li>
+              <li className="flex items-center">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
+                System configuration
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
