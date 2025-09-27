@@ -14,6 +14,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const SuperAdminDashboard = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const SuperAdminDashboard = () => {
   const fetchAdmins = async () => {
     try {
       const token = localStorage.getItem('superAdminToken');
-      const response = await fetch('http://localhost:5000/api/superadmin/admin', {
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/admin`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

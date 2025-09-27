@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Building2, MapPin, User, AlertCircle, CheckCircle } from "lucide-react";
 import SuperAdminNavbar from "../components/SuperAdminNavbar";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const SuperAdminMedicalAidList = () => {
   const navigate = useNavigate();
   const [medicalAids, setMedicalAids] = useState([]);
@@ -15,7 +17,7 @@ const SuperAdminMedicalAidList = () => {
 
   const fetchMedicalAids = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/welfarefund/all', {
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/all`, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Building2, MapPin, Users, AlertCircle, CheckCircle } from "lucide-react";
 import SuperAdminNavbar from "../components/SuperAdminNavbar";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const SuperAdminAffiliationList = () => {
   const navigate = useNavigate();
   const [affiliations, setAffiliations] = useState([]);
@@ -15,7 +17,7 @@ const SuperAdminAffiliationList = () => {
 
   const fetchAffiliations = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/mosqueAffiliation/all', {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/all`, {
         headers: {
           'Content-Type': 'application/json',
         },

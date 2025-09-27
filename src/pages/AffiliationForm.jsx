@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const AffiliationForm = () => {
   const [formData, setFormData] = useState({
     // Basic Information
@@ -290,11 +292,11 @@ const AffiliationForm = () => {
     try {
       console.log(
         "Making API call to:",
-        "http://localhost:5000/api/mosqueAffiliation/create"
+        `${API_BASE_URL}/api/mosqueAffiliation/create`
       );
 
       const response = await fetch(
-        "http://localhost:5000/api/mosqueAffiliation/create",
+        `${API_BASE_URL}/api/mosqueAffiliation/create`,
         {
           method: "POST",
           headers: {

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const MedicalAidDataListAdmin = () => {
   const navigate = useNavigate();
   const [medicalAids, setMedicalAids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchMedicalAids();
@@ -13,7 +17,7 @@ const MedicalAidDataListAdmin = () => {
 
   const fetchMedicalAids = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/welfarefund/all', {
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/all`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -38,37 +42,55 @@ const MedicalAidDataListAdmin = () => {
     navigate("/medical-list", { state: { medicalAid } });
   };
 
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'pending':
+        return {
+          text: 'Pending',
+          className: 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium'
+        };
+      case 'approved':
+        return {
+          text: 'Approved',
+          className: 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium'
+        };
+      case 'rejected':
+        return {
+          text: 'Rejected',
+          className: 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium'
+        };
+      default:
+        return {
+          text: 'Unknown',
+          className: 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium'
+        };
+    }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(medicalAids.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = medicalAids.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4 sm:p-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-green-800 mb-2">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
           ഇമാം മൗഅ്‌ദിൻ കക്ഷമനിദി
           </h1>
-          <p className="text-green-600 text-lg font-medium">
-            Imam Muazzin Medical Aid Fund
-          </p>
-          <div className="w-24 h-1 bg-green-500 mx-auto mt-4 rounded-full"></div>
+          <div className="w-32 h-1 bg-gradient-to-r from-[#5a8a42] to-[#6ba54f] mx-auto rounded-full"></div>
         </div>
 
 
         {/* Main Content Card */}
-        <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-green-100">
-          {/* Card Header */}
-          <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <svg className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              മസ്ജിദിന്റെ പേര് | Masjid Names
-            </h2>
-          </div>
+        <div className="bg-white shadow-xl rounded-2xl overflow-hidden border-0">
 
           {/* Error State */}
           {error && (
@@ -91,79 +113,117 @@ const MedicalAidDataListAdmin = () => {
 
           {/* Medical Aid List */}
           {!loading && !error && (
-            <div className="p-6">
-              <div className="grid gap-4">
-                {medicalAids.length > 0 ? (
-                  medicalAids.map((medicalAid, index) => (
-                    <div
+            <div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead style={{ backgroundColor: '#6db14e' }}>
+                    <tr>
+                      <th className="px-8 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Medical Aid Number</th>
+                      <th className="px-8 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Mosque Name</th>
+                      <th className="px-8 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Location</th>
+                      <th className="px-8 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Status</th>
+                      <th className="px-8 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                  {currentData.length > 0 ? (
+                    currentData.map((medicalAid, index) => (
+                      <tr 
                       key={medicalAid._id || index}
-                      className="group border border-green-200 rounded-lg hover:border-green-400 transition-all duration-200 hover:shadow-lg bg-gradient-to-r from-white to-green-50"
-                    >
-                      <button
+                        className={`hover:bg-gray-50 cursor-pointer ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
                         onClick={() => handleMasjidClick(medicalAid)}
-                        className="w-full p-4 text-left flex items-center justify-between hover:bg-green-50 transition-colors duration-200 rounded-lg"
                       >
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors duration-200">
-                            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {medicalAid.medicalAidNumber || `#${String(index + 1).padStart(3, '0')}`}
                           </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-green-800 group-hover:text-green-900 transition-colors duration-200">
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
                               {medicalAid.mosqueName || 'Unknown Mosque'}
-                            </h3>
-                            <div className="flex items-center mt-1">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
-                                Medical Aid #{String(index + 1).padStart(3, '0')}
-                              </span>
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {medicalAid.applicantDetails?.name || 'Applicant'}
-                              </span>
-                            </div>
-                            <p className="text-gray-500 text-xs mt-1">
-                              {medicalAid.district && medicalAid.area ? `${medicalAid.district}, ${medicalAid.area}` : 'Location not specified'}
-                            </p>
                           </div>
-                        </div>
-                        <div className="flex items-center text-green-500 group-hover:text-green-700 transition-colors duration-200">
-                          <span className="text-sm font-medium mr-2 hidden sm:inline">View Details</span>
-                          <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">
+                            {medicalAid.district && medicalAid.area ? `${medicalAid.district}, ${medicalAid.area}` : 'Not specified'}
+                          </div>
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <span className={getStatusDisplay(medicalAid.status).className}>
+                            {getStatusDisplay(medicalAid.status).text}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <button className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                        </div>
+                      </button>
+                        </td>
+                      </tr>
+                  ))
+                  ) : (
+                      <tr>
+                        <td colSpan="5" className="px-8 py-16 text-center">
+                          <div className="text-gray-400">
+                            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </div>
+                            <p className="text-lg font-medium text-gray-500">No medical aid applications found</p>
+                            <p className="text-sm text-gray-400">No medical aid applications are available at the moment.</p>
+                    </div>
+                        </td>
+                      </tr>
+                  )}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing {startIndex + 1} to {Math.min(endIndex, medicalAids.length)} of {medicalAids.length} results
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-1 text-sm border rounded-md ${
+                            page === currentPage
+                              ? 'bg-green-600 text-white border-green-600'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
                       </button>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No medical aid applications found</h3>
-                    <p className="text-gray-500">No medical aid applications are available at the moment.</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Card Footer */}
-          <div className="bg-green-50 px-6 py-4 border-t border-green-200">
-            <div className="flex items-center justify-between text-sm text-green-700">
-              <div className="flex items-center">
-                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-medium">Total Medical Aid Applications: {medicalAids.length}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="font-medium">Click on any masjid to view medical aid details</span>
-              </div>
-            </div>
-          </div>
         </div>
 
 

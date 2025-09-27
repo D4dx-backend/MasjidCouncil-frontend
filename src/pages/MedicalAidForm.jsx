@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const MedicalAidForm = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -102,7 +104,7 @@ const MedicalAidForm = () => {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/welfarefund/create', {
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

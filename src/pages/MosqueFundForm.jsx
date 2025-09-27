@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const MosqueFundForm = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -116,7 +118,7 @@ const MosqueFundForm = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/mosqueFund/create', {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueFund/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

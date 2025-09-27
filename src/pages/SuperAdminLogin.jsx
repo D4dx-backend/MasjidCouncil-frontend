@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import loginSuper from '../assets/LoginSuper.jpg';
+
+// Import Google Fonts
+const fontLink = document.createElement('link');
+fontLink.href = 'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cinzel&display=swap';
+fontLink.rel = 'stylesheet';
+document.head.appendChild(fontLink);
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SuperAdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -27,7 +36,7 @@ const SuperAdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/superadmin/login', {
+      const response = await fetch(`${API_BASE_URL}/api/superadmin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,10 +46,15 @@ const SuperAdminLogin = () => {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.token) {
         // Store token in localStorage
         localStorage.setItem('superAdminToken', data.token);
-        localStorage.setItem('superAdminUser', JSON.stringify(data.user));
+        // Create a user object with the username from form data
+        const userData = {
+          username: formData.username,
+          role: 'superadmin'
+        };
+        localStorage.setItem('superAdminUser', JSON.stringify(userData));
         
         // Navigate to super admin dashboard
         navigate('/superadmin-dashboard');
@@ -56,104 +70,92 @@ const SuperAdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 lg:p-8">
-      <div className="max-w-md w-full">
-        {/* Professional Header Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-4 mb-6">
-            <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Super Admin Login</h1>
-              <p className="text-gray-600">Access the administrative panel</p>
-            </div>
+    <div 
+      className="min-h-screen flex items-center justify-center p-6 lg:p-8 relative pt-20"
+      style={{
+        backgroundImage: `url(${loginSuper})`,
+        backgroundSize: '40%',
+        backgroundPosition: 'left top',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        backgroundColor: '#adc5cc'
+      }}
+    >
+      {/* Overlay to reduce image opacity */}
+      <div className="absolute inset-0 bg-white/70"></div>
+      
+
+
+      {/* Main Content */}
+      <div className="max-w-md w-full relative z-20 ml-180 -mt-24">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
           </div>
-        </div>
+        )}
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Professional Header Section */}
+          <div className="flex items-center justify-start mb-10 -ml-20">
+            <img 
+              src={logo} 
+              alt="Masjid Council Kerala" 
+              className="h-20 w-auto mr-8"
+            />
+            <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
+          </div>
+          <div>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+              placeholder="Enter username"
+              required
+            />
+          </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-500 mb-2">
-                Username
-              </label>
+          <div>
+            <div className="relative">
               <input
-                type="text"
-                name="username"
-                value={formData.username}
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                placeholder="Enter username"
+                className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 pr-14 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+                placeholder="Enter password"
                 required
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-36 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <Eye className="h-5 w-5 text-gray-400" />
+                )}
+              </button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-500 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  placeholder="Enter password"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 rounded-lg transition-colors"
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-
-          <div className="bg-emerald-50 p-6 rounded-lg mt-6">
-            <h4 className="font-semibold mb-3 text-emerald-800">Super Admin Access:</h4>
-            <ul className="space-y-2 text-sm text-emerald-700">
-              <li className="flex items-center">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
-                Full system administration
-              </li>
-              <li className="flex items-center">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
-                Create and manage admins
-              </li>
-              <li className="flex items-center">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
-                View all system data
-              </li>
-              <li className="flex items-center">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></div>
-                System configuration
-              </li>
-            </ul>
           </div>
-        </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ml-10"
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+      </div>
+      
+      {/* Arabic text at bottom */}
+      <div className="absolute bottom-6 right-74 text-right mb-12">
+        <p className="text-3xl text-gray-700 font-medium" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
+          وَأَنَّ ٱلْمَسَٰجِدَ لِلَّهِ فَلَا تَدْعُواْ مَعَ ٱللَّهِ أَحَدًا
+        </p>
       </div>
     </div>
   );

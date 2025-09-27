@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Building2, MapPin, User, DollarSign, AlertCircle, CheckCircle } from "lucide-react";
 import SuperAdminNavbar from "../components/SuperAdminNavbar";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const SuperAdminMosqueFundList = () => {
   const navigate = useNavigate();
   const [mosqueFunds, setMosqueFunds] = useState([]);
@@ -15,7 +17,7 @@ const SuperAdminMosqueFundList = () => {
 
   const fetchMosqueFunds = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/mosqueFund/all', {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueFund/all`, {
         headers: {
           'Content-Type': 'application/json',
         },

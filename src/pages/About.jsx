@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { MapPin, Phone, Mail, Target, Award } from 'lucide-react';
-import aboutUsMain from '../assets/aboutUsMain.png';
 import logo from '../assets/logo.png';
 import mainAboutUs from '../assets/aboutMain.webp';
 

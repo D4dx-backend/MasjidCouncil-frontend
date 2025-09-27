@@ -17,7 +17,6 @@ import MedicalAidDataList from './pages/MedicalAidDataList';
 import MedicalAidDataListAdmin from './pages/MedicalAidDataListAdmin';
 import MosqueFundList from './pages/MosqueFundList';
 import MosqueFundListAdmin from './pages/MosqueFundListAdmin';
-import ChangePasswordRequest from './pages/ChangePasswordRequest';
 import SuperAdminAffiliationList from './pages/SuperAdminAffiliationList';
 import SuperAdminMedicalAidList from './pages/SuperAdminMedicalAidList';
 import SuperAdminMosqueFundList from './pages/SuperAdminMosqueFundList';
@@ -32,13 +31,13 @@ const Layout = () => {
 
   const adminRoutes = [
     '/affliation-list',
+    '/affiliation-list',
     '/affliation-list-admin',
     '/admin-home',
     '/medical-list',
     '/medical-list-admin',
     '/mosque-list',
-    '/mosque-list-admin',
-    '/change-password'
+    '/mosque-list-admin'
   ];
 
   const superAdminRoutes = [
@@ -76,13 +75,13 @@ const Layout = () => {
         <Route path="/superadmin-login" element={<SuperAdminLogin />} />
         <Route path="/superadmin-dashboard" element={<SuperAdminDashboard />} />
         <Route path="/affliation-list" element={<AffiliationFormLit />} />
+        <Route path="/affiliation-list" element={<AffiliationFormLit />} />
         <Route path="/affliation-list-admin" element={<AffiliationFormListAdmin />} />
         <Route path="/admin-home" element={<AdminHome />} />
         <Route path="/medical-list" element={<MedicalAidDataList />} />
         <Route path="/medical-list-admin" element={<MedicalAidDataListAdmin />} />
         <Route path="/mosque-list" element={<MosqueFundList />} />
         <Route path="/mosque-list-admin" element={<MosqueFundListAdmin />} />
-        <Route path="/change-password" element={<ChangePasswordRequest />} />
         <Route path="/superadmin-affiliation-list" element={<SuperAdminAffiliationList />} />
         <Route path="/superadmin-medical-list" element={<SuperAdminMedicalAidList />} />
         <Route path="/superadmin-mosque-fund-list" element={<SuperAdminMosqueFundList />} />

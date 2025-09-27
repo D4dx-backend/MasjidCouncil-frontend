@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
+// Import Cinzel font
+const cinzelFont = {
+  fontFamily: "'Cinzel', serif"
+};
+
 const AdminNavbar = () => {
     const navigate = useNavigate();
 
@@ -56,25 +61,29 @@ const AdminNavbar = () => {
             <div className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => handleNavigation('/admin-home')}
-                className="text-gray-700 hover:text-green-600 transition duration-200 px-3 py-2 rounded-md hover:bg-green-50"
+                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                style={cinzelFont}
               >
                 Home
               </button>
               <button
                 onClick={() => handleNavigation('/affliation-list-admin')}
-                className="text-gray-700 hover:text-green-600 transition duration-200 px-3 py-2 rounded-md hover:bg-green-50"
+                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                style={cinzelFont}
               >
                 Affiliation
               </button>
               <button
                 onClick={() => handleNavigation('/medical-list-admin')}
-                className="text-gray-700 hover:text-green-600 transition duration-200 px-3 py-2 rounded-md hover:bg-green-50"
+                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                style={cinzelFont}
               >
-                Medical Aid
+                Welfare Fund
               </button>
               <button
                 onClick={() => handleNavigation('/mosque-list-admin')}
-                className="text-gray-700 hover:text-green-600 transition duration-200 px-3 py-2 rounded-md hover:bg-green-50"
+                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                style={cinzelFont}
               >
                 Mosque Fund
               </button>
@@ -84,12 +93,12 @@ const AdminNavbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               <button 
                 onClick={handleLogout}
-                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-200 font-medium"
+                className="text-red-500 hover:text-red-700 p-2 rounded-md hover:bg-red-50 transition duration-200"
+                title="Logout"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
               </button>
             </div>
 
@@ -132,25 +141,29 @@ const AdminNavbar = () => {
                 <div className="px-2 pt-2 pb-3 space-y-1">
                   <button
                     onClick={() => handleNavigation('/admin-home')}
-                    className="text-gray-700 hover:text-green-600 hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left"
+                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    style={cinzelFont}
                   >
                     Home
                   </button>
                   <button
                     onClick={() => handleNavigation('/affliation-list-admin')}
-                    className="text-gray-700 hover:text-green-600 hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left"
+                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    style={cinzelFont}
                   >
                     Affiliation
                   </button>
                   <button
                     onClick={() => handleNavigation('/medical-list-admin')}
-                    className="text-gray-700 hover:text-green-600 hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left"
+                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    style={cinzelFont}
                   >
-                    Medical Aid
+                    Welfare Fund
                   </button>
                   <button
                     onClick={() => handleNavigation('/mosque-list-admin')}
-                    className="text-gray-700 hover:text-green-600 hover:bg-green-50 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left"
+                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    style={cinzelFont}
                   >
                     Mosque Fund
                   </button>
@@ -159,12 +172,12 @@ const AdminNavbar = () => {
                   <div className="border-t border-gray-200 pt-4 mt-4">
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-md transition duration-200 w-full font-medium"
+                      className="flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-md transition duration-200 w-full"
+                      title="Logout"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
-                      <span>Logout</span>
                     </button>
                   </div>
                 </div>
