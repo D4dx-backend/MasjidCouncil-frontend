@@ -31,7 +31,6 @@ const Layout = () => {
 
   const adminRoutes = [
     '/affliation-list',
-    '/affiliation-list',
     '/affliation-list-admin',
     '/admin-home',
     '/medical-list',
@@ -75,7 +74,6 @@ const Layout = () => {
         <Route path="/superadmin-login" element={<SuperAdminLogin />} />
         <Route path="/superadmin-dashboard" element={<SuperAdminDashboard />} />
         <Route path="/affliation-list" element={<AffiliationFormLit />} />
-        <Route path="/affiliation-list" element={<AffiliationFormLit />} />
         <Route path="/affliation-list-admin" element={<AffiliationFormListAdmin />} />
         <Route path="/admin-home" element={<AdminHome />} />
         <Route path="/medical-list" element={<MedicalAidDataList />} />

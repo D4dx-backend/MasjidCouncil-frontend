@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
 // Import Cinzel font
@@ -8,7 +8,8 @@ const cinzelFont = {
 };
 
 const AdminNavbar = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -39,6 +40,10 @@ const AdminNavbar = () => {
   const cancelLogout = () => {
     setShowLogoutConfirm(false);
   };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
   
 
   return (
@@ -61,31 +66,47 @@ const AdminNavbar = () => {
             <div className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => handleNavigation('/admin-home')}
-                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
+                  isActive('/admin-home')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
                 style={cinzelFont}
               >
                 Home
               </button>
               <button
                 onClick={() => handleNavigation('/affliation-list-admin')}
-                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
+                  isActive('/affliation-list-admin')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
                 style={cinzelFont}
               >
                 Affiliation
               </button>
               <button
                 onClick={() => handleNavigation('/medical-list-admin')}
-                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
+                  isActive('/medical-list-admin')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
                 style={cinzelFont}
               >
                 Welfare Fund
               </button>
               <button
                 onClick={() => handleNavigation('/mosque-list-admin')}
-                className="text-black text-base font-semibold tracking-wide hover:text-green-600 transition-all duration-300 hover:scale-105 px-3 py-2"
+                className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
+                  isActive('/mosque-list-admin')
+                    ? 'text-green-600'
+                    : 'text-black hover:text-green-600'
+                }`}
                 style={cinzelFont}
               >
-                Mosque Fund
+                Masjid Fund
               </button>
             </div>
 
@@ -141,31 +162,47 @@ const AdminNavbar = () => {
                 <div className="px-2 pt-2 pb-3 space-y-1">
                   <button
                     onClick={() => handleNavigation('/admin-home')}
-                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
+                      isActive('/admin-home')
+                        ? 'text-green-600'
+                        : 'text-black hover:text-green-600'
+                    }`}
                     style={cinzelFont}
                   >
                     Home
                   </button>
                   <button
                     onClick={() => handleNavigation('/affliation-list-admin')}
-                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
+                      isActive('/affliation-list-admin')
+                        ? 'text-green-600'
+                        : 'text-black hover:text-green-600'
+                    }`}
                     style={cinzelFont}
                   >
                     Affiliation
                   </button>
                   <button
                     onClick={() => handleNavigation('/medical-list-admin')}
-                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
+                      isActive('/medical-list-admin')
+                        ? 'text-green-600'
+                        : 'text-black hover:text-green-600'
+                    }`}
                     style={cinzelFont}
                   >
                     Welfare Fund
                   </button>
                   <button
                     onClick={() => handleNavigation('/mosque-list-admin')}
-                    className="text-black text-base font-semibold tracking-wide hover:text-green-600 block px-3 py-2 transition-all duration-300 hover:scale-105 w-full text-left"
+                    className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
+                      isActive('/mosque-list-admin')
+                        ? 'text-green-600'
+                        : 'text-black hover:text-green-600'
+                    }`}
                     style={cinzelFont}
                   >
-                    Mosque Fund
+                    Masjid Fund
                   </button>
                   
                   {/* Mobile Logout Button */}

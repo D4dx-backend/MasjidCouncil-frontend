@@ -1,60 +1,213 @@
-import React from 'react';
-import { ArrowLeft, Download, Edit, Printer, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import SuperAdminNavbar from '../components/SuperAdminNavbar';
 
-const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
-  // Comprehensive dummy data for medical aid application
-  const formData = {
-    // Mosque Details
-    mosqueName: "ജുമാഅ മസ്ജിദ് അൽ നൂർ",
-    mckAffiliation: "MCK/2023/001",
-    address: "അൽ നൂർ മസ്ജിദ്\nമെയിൻ റോഡ്\nകണയാന്നൂർ\nഎറണാകുളം ജില്ല\nകേരളം - 682312",
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const SuperAdminMedicalAidDetails = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    // Get the medical aid ID from location state
+    const medicalAidId = location.state?.medicalAid?._id;
     
-    // Management Details
-    committeePerson: "ഹാജി അബ്ദുൽ റഹ്മാൻ",
-    managementType: "മാനേജിംഗ് കമ്മിറ്റി",
-    phone: "0484-2345678",
-    whatsapp: "9876543210",
-    presidentPhone: "9876543211",
-    presidentChairman: "ഹാജി അബ്ദുൽ റഹ്മാൻ",
-    
-    // Jamaat Details
-    jammatDetails: "കണയാന്നൂർ ജമാഅത്ത്",
-    area: "കണയാന്നൂർ ഏരിയ",
-    district: "എറണാകുളം",
-    
-    // Application Details
-    applicantDetails: "മുഹമ്മദ് അലി",
-    chairmanDesignation: "ഇമാം",
-    salary: "25000",
-    
-    // Help Details
-    helpPurpose: "വീട് റിപ്പയർ",
-    needDescription: "വീടിന്റെ മേൽക്കൂര പൊളിഞ്ഞ് വീണതിനാൽ പുതിയ മേൽക്കൂര പണിയേണ്ടതുണ്ട്. മഴക്കാലം വരുന്നതിനു മുൻപ് ഈ പണി പൂർത്തിയാക്കേണ്ടതാണ്. കുടുംബത്തിൽ 4 പേർ ഉണ്ട് - ഭാര്യയും രണ്ടു മക്കളും. വീട്ടിലെ സാഹചര്യം വളരെ മോശമാണ്.",
-    expectedExpense: "150000",
-    ownContribution: "50000",
-    previousHelp: "ഇല്ല",
-    
-    // Mosque Official Details
-    mosquePresident: "മുഹമ്മദ് ഫാറൂഖ്",
-    mosquePhone: "9876543212",
-    
-    // Additional calculated fields
-    requestedAmount: "100000", // expectedExpense - ownContribution
-    submissionDate: "2025-01-15",
-    applicationId: "MED/2025/001",
-    status: "പരിഗണനയിൽ",
-    
-    // Family Details (additional context)
-    familySize: "4",
-    dependents: "ഭാര്യ, രണ്ടു മക്കൾ",
-    workExperience: "15 വർഷം",
-    previousEmployment: "അൽ അമീൻ മസ്ജിദ് (5 വർഷം), ദാരുസ് സലാം മസ്ജിദ് (10 വർഷം)",
-    currentWorkDuration: "3 വർഷം",
-    
-    // Emergency Contact
-    emergencyContact: "അഹമദ് ഹുസൈൻ (സഹോദരൻ)",
-    emergencyPhone: "9876543213"
+    if (medicalAidId) {
+      fetchMedicalAidDetails(medicalAidId);
+    } else {
+      setError('No medical aid data found');
+      setLoading(false);
+    }
+  }, [location.state]);
+
+  const fetchMedicalAidDetails = async (id) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setFormData(data.data);
+      } else {
+        setError(data.message || 'Failed to fetch medical aid details');
+      }
+    } catch (error) {
+      console.error('Fetch medical aid details error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const showAlert = (message, type = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlertModal(false);
+    setAlertMessage('');
+  };
+
+  const handleConfirmClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = async () => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowConfirmModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/${formData._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: 'approved'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert('Medical aid application approved successfully!', 'success');
+        setShowConfirmModal(false);
+        // Update the local state
+        setFormData({ ...formData, status: 'approved' });
+      } else {
+        showAlert('Failed to approve application: ' + data.message, 'error');
+        setShowConfirmModal(false);
+      }
+    } catch (error) {
+      console.error('Approve application error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowConfirmModal(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectClick = () => {
+    setShowRejectModal(true);
+  };
+
+  const handleReject = async () => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowRejectModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/welfarefund/${formData._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: 'rejected'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert('Medical aid application rejected successfully!', 'success');
+        setShowRejectModal(false);
+        // Update the local state
+        setFormData({ ...formData, status: 'rejected' });
+      } else {
+        showAlert('Failed to reject application: ' + data.message, 'error');
+        setShowRejectModal(false);
+      }
+    } catch (error) {
+      console.error('Reject application error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowRejectModal(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading medical aid details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            Error: {error}
+          </h2>
+          <button 
+            onClick={handleBack}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            ഡാറ്റ ലഭ്യമല്ല
+          </h2>
+          <button 
+            onClick={handleBack}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Use actual formData instead of dummy data
+  const displayData = formData || {};
 
   const handlePrint = () => {
     window.print();
@@ -68,7 +221,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
     alert('അപേക്ഷ അനുമതി നൽകി!');
   };
 
-  const handleReject = () => {
+  const handleRejectOld = () => {
     alert('അപേക്ഷ നിരസിച്ചു!');
   };
 
@@ -87,51 +240,23 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Professional Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
+      <SuperAdminNavbar />
+      <div className="p-4">
+        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+          <div className="flex items-center gap-3">
               <button 
-                onClick={onBack}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={handleBack}
+              className="p-2 hover:bg-green-700 rounded-full transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Download className="w-6 h-6 text-white" />
-                </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Medical Aid Application Details</h1>
-                  <p className="text-gray-600">Review and manage medical aid application</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={onEdit}
-                className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
-              <button 
-                onClick={handlePrint}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button 
-                onClick={handleDownload}
-                className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </button>
+              <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+              <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+              <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -143,19 +268,19 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Application ID</label>
-                <p className="text-lg font-bold text-blue-600">{formData.applicationId}</p>
+                <p className="text-lg font-bold text-blue-600">{displayData.applicationId || displayData._id?.slice(-8) || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Submission Date</label>
-                <p className="text-lg font-medium text-gray-900">{formData.submissionDate}</p>
+                <p className="text-lg font-medium text-gray-900">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Status</label>
-                <div className="mt-1">{getStatusBadge(formData.status)}</div>
+                <div className="mt-1">{getStatusBadge(displayData.status || 'pending')}</div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Requested Amount</label>
-                <p className="text-lg font-bold text-red-600">₹{formData.requestedAmount}</p>
+                <p className="text-lg font-bold text-red-600">₹{displayData.requestedAmount || displayData.expectedExpense || '0'}</p>
               </div>
             </div>
           </div>
@@ -166,16 +291,16 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Mosque Name</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mosqueName}</p>
+                <p className="text-lg font-medium text-gray-900">{displayData.mosqueName || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">MCK Affiliation Number</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mckAffiliation}</p>
+                <p className="text-lg font-medium text-gray-900">{displayData.mckAffiliation || 'N/A'}</p>
               </div>
             </div>
             <div className="mt-4">
               <label className="text-sm font-medium text-gray-500">Address</label>
-              <p className="text-gray-900 whitespace-pre-wrap">{formData.address}</p>
+              <p className="text-gray-900 whitespace-pre-wrap">{displayData.address || 'N/A'}</p>
             </div>
           </div>
 
@@ -185,27 +310,27 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Committee President</label>
-                <p className="text-gray-900">{formData.committeePerson}</p>
+                <p className="text-gray-900">{displayData.committeePerson || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Management Type</label>
-                <p className="text-gray-900">{formData.managementType}</p>
+                <p className="text-gray-900">{displayData.managementType || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p className="text-gray-900">{formData.phone}</p>
+                <p className="text-gray-900">{displayData.phone || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">WhatsApp</label>
-                <p className="text-gray-900">{formData.whatsapp}</p>
+                <p className="text-gray-900">{displayData.whatsapp || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">President Phone</label>
-                <p className="text-gray-900">{formData.presidentPhone}</p>
+                <p className="text-gray-900">{displayData.presidentPhone || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">President/Chairman</label>
-                <p className="text-gray-900">{formData.presidentChairman}</p>
+                <p className="text-gray-900">{displayData.presidentChairman || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -216,15 +341,15 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Jamaat Unit</label>
-                <p className="text-gray-900">{formData.jammatDetails}</p>
+                <p className="text-gray-900">{displayData.jammatDetails || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Area</label>
-                <p className="text-gray-900">{formData.area}</p>
+                <p className="text-gray-900">{displayData.area || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">District</label>
-                <p className="text-gray-900">{formData.district}</p>
+                <p className="text-gray-900">{displayData.district || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -236,15 +361,15 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Application For</label>
-                  <p className="text-lg font-medium text-gray-900">{formData.applicantDetails}</p>
+                  <p className="text-lg font-medium text-gray-900">{displayData.applicantDetails || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Position</label>
-                  <p className="text-gray-900">{formData.chairmanDesignation}</p>
+                  <p className="text-gray-900">{displayData.chairmanDesignation || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Salary</label>
-                  <p className="text-lg font-medium text-green-600">₹{formData.salary}</p>
+                  <p className="text-lg font-medium text-green-600">₹{displayData.salary || '0'}</p>
                 </div>
               </div>
             </div>
@@ -256,20 +381,20 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">Purpose of Help</label>
-                <p className="text-lg font-medium text-blue-600">{formData.helpPurpose}</p>
+                <p className="text-lg font-medium text-blue-600">{displayData.helpPurpose || 'N/A'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Detailed Description</label>
-                <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{formData.needDescription}</p>
+                <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{displayData.needDescription || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-red-50 p-4 rounded-lg">
                   <label className="text-sm font-medium text-gray-500">Expected Expense</label>
-                  <p className="text-xl font-bold text-red-600">₹{formData.expectedExpense}</p>
+                  <p className="text-xl font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <label className="text-sm font-medium text-gray-500">Own Contribution</label>
-                  <p className="text-xl font-bold text-green-600">₹{formData.ownContribution}</p>
+                  <p className="text-xl font-bold text-green-600">₹{displayData.ownContribution || '0'}</p>
                 </div>
               </div>
             </div>
@@ -280,7 +405,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Previous Help</h2>
             <div>
               <label className="text-sm font-medium text-gray-500">Previous Help from MCK</label>
-              <p className="text-lg font-medium text-gray-900">{formData.previousHelp}</p>
+              <p className="text-lg font-medium text-gray-900">{displayData.previousHelp || 'N/A'}</p>
             </div>
           </div>
 
@@ -291,15 +416,15 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-medium mb-3 text-blue-800">President / Secretary</h3>
                 <div className="space-y-2">
-                  <p><span className="text-sm text-gray-500">Name:</span> {formData.mosquePresident}</p>
-                  <p><span className="text-sm text-gray-500">Phone:</span> {formData.mosquePhone}</p>
+                  <p><span className="text-sm text-gray-500">Name:</span> {displayData.mosquePresident || 'N/A'}</p>
+                  <p><span className="text-sm text-gray-500">Phone:</span> {displayData.mosquePhone || 'N/A'}</p>
                 </div>
               </div>
               <div className="p-4 bg-green-50 rounded-lg">
                 <h3 className="font-medium mb-3 text-green-800">Emergency Contact</h3>
                 <div className="space-y-2">
-                  <p><span className="text-sm text-gray-500">Name:</span> {formData.emergencyContact}</p>
-                  <p><span className="text-sm text-gray-500">Phone:</span> {formData.emergencyPhone}</p>
+                  <p><span className="text-sm text-gray-500">Name:</span> {displayData.emergencyContact || 'N/A'}</p>
+                  <p><span className="text-sm text-gray-500">Phone:</span> {displayData.emergencyPhone || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -362,6 +487,7 @@ const SuperAdminMedicalAidDetails = ({ onBack, onEdit }) => {
                 <XCircle className="w-5 h-5" />
                 Reject Application
               </button>
+            </div>
             </div>
           </div>
         </div>

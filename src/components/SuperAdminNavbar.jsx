@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Shield, 
-  Users, 
-  Heart, 
-  Building, 
-  DollarSign, 
-  LogOut, 
-  Menu, 
-  X,
-  Home
-} from 'lucide-react';
+import logo from '../assets/logo.png';
+
+// Import Cinzel font
+const cinzelFont = {
+  fontFamily: "'Cinzel', serif"
+};
 
 const SuperAdminNavbar = () => {
   const navigate = useNavigate();
@@ -48,73 +43,67 @@ const SuperAdminNavbar = () => {
   const navItems = [
     {
       path: '/superadmin-dashboard',
-      label: 'Dashboard',
-      icon: Home,
-      description: 'Admin Management'
+      label: 'Dashboard'
     },
     {
       path: '/superadmin-affiliation-list',
-      label: 'Affiliation',
-      icon: Building,
-      description: 'Mosque Affiliation'
+      label: 'Affiliation'
     },
     {
       path: '/superadmin-medical-list',
-      label: 'Medical Aid',
-      icon: Heart,
-      description: 'Medical Aid Fund'
+      label: 'Welfare Fund'
     },
     {
       path: '/superadmin-mosque-fund-list',
-      label: 'Mosque Fund',
-      icon: DollarSign,
-      description: 'Mosque Fund'
+      label: 'Masjid Fund'
     }
   ];
 
   return (
     <>
-      <nav className="bg-emerald-800 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            {/* Left side - Logo */}
-            <div className="flex items-center">
-              <Shield className="h-8 w-8 text-white mr-3" />
-              <div>
-                <h1 className="text-white text-xl font-bold">Super Admin Panel</h1>
-                <p className="text-emerald-100 text-xs">Masjid Council Kerala</p>
+      <header>
+      {/* Top green gradient bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#239a5a] via-[#6db14e] to-green-700" />
+
+      {/* Main navbar content */}
+      <nav className="bg-white shadow">
+        <div className="px-4 md:px-8 lg:px-16">
+          <div className="mx-auto max-w-7xl flex items-center justify-between py-4">
+            {/* Logo and Text */}
+            <div className="flex items-center space-x-3">
+              <div className="w-32 h-10 rounded-full flex items-center justify-center">
+                <img src={logo} alt="Masjid Council Kerala" className="h-15 w-24" />
               </div>
             </div>
 
             {/* Desktop Navigation Links - Hidden on mobile */}
             <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md transition duration-200 ${
-                      isActive(item.path)
-                        ? 'bg-emerald-600 text-white shadow'
-                        : 'text-emerald-100 hover:text-white hover:bg-emerald-700'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </button>
-                );
-              })}
+              {navItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 px-3 py-2 ${
+                    isActive(item.path)
+                      ? 'text-green-600'
+                      : 'text-black hover:text-green-600'
+                  }`}
+                  style={cinzelFont}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
 
             {/* Desktop Right side - Hidden on mobile */}
             <div className="hidden md:flex items-center space-x-4">
-              <button
+              <button 
                 onClick={handleLogout}
-                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-200 font-medium"
+                className="text-red-500 hover:text-red-700 p-2 rounded-md hover:bg-red-50 transition duration-200"
+                title="Logout"
               >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
               </button>
             </div>
 
@@ -122,59 +111,75 @@ const SuperAdminNavbar = () => {
             <div className="md:hidden">
               <button
                 onClick={toggleMobileMenu}
-                className="text-white hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 p-2 rounded-md"
+                className="text-gray-700 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 p-2 rounded-md"
                 aria-label="Toggle mobile menu"
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  {isMobileMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Mobile menu - Visible only when open */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-emerald-700">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.path}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`flex items-center space-x-3 text-white hover:text-emerald-200 hover:bg-emerald-700 block px-3 py-2 rounded-md text-base font-medium transition duration-200 w-full text-left ${
-                        isActive(item.path) ? 'bg-emerald-700 text-white' : ''
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <div>
-                        <div className="font-medium">{item.label}</div>
-                        <div className="text-xs text-emerald-200">{item.description}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-                
-                {/* Mobile Logout */}
-                <div className="border-t border-emerald-700 pt-4 mt-4">
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-md transition duration-200 w-full font-medium"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
-                </div>
+        {/* Mobile menu - Visible only when open */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`text-base font-semibold tracking-wide transition-all duration-300 hover:scale-105 block px-3 py-2 w-full text-left ${
+                    isActive(item.path)
+                      ? 'text-green-600'
+                      : 'text-black hover:text-green-600'
+                  }`}
+                  style={cinzelFont}
+                >
+                  {item.label}
+                </button>
+              ))}
+              
+              {/* Mobile Logout Button */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-4 py-3 rounded-md transition duration-200 w-full"
+                  title="Logout"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </nav>
+      </header>
 
       {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
+    {showLogoutConfirm && (
         <div className="fixed inset-0 bg-gray-600/60 backdrop-blur-md overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white/90 backdrop-blur-lg border-white/20">
             <div className="mt-3">
@@ -216,5 +221,7 @@ const SuperAdminNavbar = () => {
 };
 
 export default SuperAdminNavbar;
+
+
 
 

@@ -68,6 +68,49 @@ const MosqueFundList = () => {
     setAlertMessage('');
   };
 
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback to direct link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const getFileType = (url) => {
+    if (!url) return 'unknown';
+    const extension = url.split('.').pop().toLowerCase();
+    if (extension === 'pdf') return 'pdf';
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) return 'image';
+    return 'unknown';
+  };
+
+  const getFileTypeDisplay = (url) => {
+    const type = getFileType(url);
+    return type === 'pdf' ? 'PDF രേഖ' : 'ചിത്ര രേഖ';
+  };
+
+  const getViewButtonText = (url) => {
+    const type = getFileType(url);
+    return type === 'pdf' ? 'രേഖ കാണുക' : 'ചിത്രം കാണുക';
+  };
+
   const handleConfirmClick = () => {
     setShowConfirmModal(true);
   };
@@ -348,79 +391,133 @@ const MosqueFundList = () => {
             </div>
           </section>
 
-          {/* Bank Details */}
+          {/* Required Documents */}
           <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ബാങ്ക് വിവരങ്ങൾ</h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <label className="text-sm font-medium text-gray-600 block mb-2">ബാങ്ക് പാസ് ബുക്ക് വിവരങ്ങൾ</label>
-              <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.bankPassbook || 'വിവരം ഇല്ല'}</p>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Bank Passbook Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-blue-900">ബാങ്ക് പാസ്ബുക്ക്</h3>
+                  <div className="flex items-center text-blue-600">
+                    {getFileType(formData.bankPassbook) === 'pdf' ? (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {getFileTypeDisplay(formData.bankPassbook)}
+                  </div>
+                </div>
+                
+                {formData.bankPassbook && formData.bankPassbook.startsWith('http') ? (
+                  <div className="flex gap-2">
+                      <a 
+                        href={formData.bankPassbook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {getViewButtonText(formData.bankPassbook)}
+                      </a>
+                    <button 
+                      onClick={() => handleDownload(formData.bankPassbook, `bank-passbook-${formData._id?.slice(-8) || 'document'}.pdf`)}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      ഡൗൺലോഡ്
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-sm">ബാങ്ക് പാസ്ബുക്ക് അപ്ലോഡ് ചെയ്തിട്ടില്ല</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Plan & Estimate Card */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-green-900">പദ്ധതി & കണക്ക്</h3>
+                  <div className="flex items-center text-green-600">
+                    {getFileType(formData.fullEstimate) === 'pdf' ? (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {getFileTypeDisplay(formData.fullEstimate)}
+                  </div>
+                </div>
+                
+                {formData.fullEstimate && formData.fullEstimate.startsWith('http') ? (
+                  <div className="flex gap-2">
+                      <a 
+                        href={formData.fullEstimate}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {getViewButtonText(formData.fullEstimate)}
+                      </a>
+                    <button 
+                      onClick={() => handleDownload(formData.fullEstimate, `plan-estimate-${formData._id?.slice(-8) || 'document'}.pdf`)}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      ഡൗൺലോഡ്
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-sm">പദ്ധതി & കണക്ക് അപ്ലോഡ് ചെയ്തിട്ടില്ല</p>
+                  </div>
+                )}
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg mt-4">
-              <label className="text-sm font-medium text-gray-600 block mb-2">പ്ലാൻ, എസ്റ്റിമേറ്റ് വിവരങ്ങൾ</label>
-              <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.plan || 'വിവരം ഇല്ല'}</p>
             </div>
           </section>
 
           {/* Contact Details */}
           <section className="border border-gray-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ബന്ധപ്പെടാനുള്ള വിവരങ്ങൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-medium mb-3 text-blue-800">മസ്ജിദ് ഉദ്യോഗസ്ഥൻ</h3>
                 <div className="space-y-2">
                   <p><span className="text-sm text-gray-600">പേര്:</span> {formData.mosqueOfficialName || 'വിവരം ഇല്ല'}</p>
                   <p><span className="text-sm text-gray-600">ഫോൺ:</span> {formData.mosqueOfficialPhone || 'വിവരം ഇല്ല'}</p>
                   <p><span className="text-sm text-gray-600">വാട്സ്ആപ്പ്:</span> {formData.whatsappNumber || 'വിവരം ഇല്ല'}</p>
-                </div>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-medium mb-3 text-green-800">അടിയന്തിര ബന്ധം</h3>
-                <div className="space-y-2">
-                  <p><span className="text-sm text-gray-600">പേര്:</span> {formData.emergencyContact || 'വിവരം ഇല്ല'}</p>
-                  <p><span className="text-sm text-gray-600">ഫോൺ:</span> {formData.emergencyPhone || 'വിവരം ഇല്ല'}</p>
-                </div>
               </div>
             </div>
           </section>
 
-          {/* Required Documents Checklist */}
-          <section className="border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">ആവശ്യമായ രേഖകൾ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-gray-900">മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-gray-900">പ്ലാൻ, എസ്റ്റിമേറ്റ് രേഖകൾ</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-gray-900">മസ്ജിദ് ഫോട്ടോകൾ</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-gray-900">അറ്റകുറ്റപ്പണി എസ്റ്റിമേറ്റ്</span>
-              </div>
-            </div>
-          </section>
 
           {/* Action Buttons - Only show for pending status */}
           {formData.status === 'pending' && (

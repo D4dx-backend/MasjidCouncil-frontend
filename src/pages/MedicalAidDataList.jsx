@@ -218,7 +218,7 @@ const MedicalAidDataList = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-bold">ഇമാം മൗഅ്‌ദിൻ കക്ഷമനിദി അപേക്ഷ</h1>
+              <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
               <p className="text-green-100 text-sm">Medical Aid Application Details</p>
               <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>

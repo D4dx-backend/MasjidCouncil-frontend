@@ -1,84 +1,265 @@
-import React from 'react';
-import { ArrowLeft, Download, Edit, Printer, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import SuperAdminNavbar from '../components/SuperAdminNavbar';
 
-const SuperAdminMosqueFundDetails = ({ onBack, onEdit }) => {
-  // Comprehensive dummy data for mosque fund application
-  const formData = {
-    // Mosque Details
-    mosqueName: "ബൈതുൽ മുകറം മസ്ജിദ്",
-    mckAffiliation: "MCK/2023/078",
-    address: "ബൈതുൽ മുകറം മസ്ജിദ്\nചർച്ച് റോഡ്\nകഴക്കൂട്ടം\nതിരുവനന്തപുരം ജില്ല\nകേരളം - 695013",
-    managementType: "മാനേജിംഗ് കമ്മിറ്റി",
-    presidentSecretary: "സലിം ഹാജി",
-    jamathIslami: "കഴക്കൂട്ടം ജമാഅത്ത്",
-    phone: "0471-2345678",
-    area: "കഴക്കൂട്ടം ഏരിയ",
-    district: "തിരുവനന്തപുരം",
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const SuperAdminMosqueFundDetails = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    // Get the mosque fund ID from location state
+    const mosqueFundId = location.state?.mosqueFund?._id;
     
-    // Help Status
-    mckFundService: "ഉണ്ട്",
-    previousHelp: "ഇല്ല",
-    
-    // Current Help Details
-    helpPurpose: "മസ്ജിദ് മേൽക്കൂര അറ്റകുറ്റപ്പണി",
-    needDescription: "മഴക്കാലത്ത് മസ്ജിദിന്റെ മേൽക്കൂരയിൽ നിന്ന് ചോരുന്ന കാരണത്താൽ നമസ്കാര പ്രവർത്തനങ്ങൾ ബാധിക്കപ്പെടുന്നുണ്ട്. 40 വർഷം പഴക്കമുള്ള ഈ മസ്ജിദിന്റെ മേൽക്കൂര പൂർണമായും പുനർനിർമ്മിക്കേണ്ടതുണ്ട്. മസ്ജിദിന്റെ വിസ്തീർണം 2500 ചതുരശ്ര അടിയാണ്. പുതിയ ടൈലുകൾ, ട്രസുകൾ, സീലിംഗ് എന്നിവ ആവശ്യമാണ്.",
-    expectedExpense: "350000",
-    ownContribution: "150000",
-    
-    // Contact Details
-    mosqueOfficialName: "മുഹമ്മദ് ഫൈസൽ (സെക്രട്ടറി)",
-    mosqueOfficialPhone: "9876543210",
-    whatsappNumber: "9876543210",
-    
-    // Bank Details
-    bankPassbook: "അക്കൗണ്ട് നമ്പർ: 1234567890123456\nഅക്കൗണ്ട് ഹോൾഡർ: ബൈതുൽ മുകറം മസ്ജിദ് കമ്മിറ്റി\nബാങ്ക്: സൗത്ത് ഇന്ത്യൻ ബാങ്ക്\nബ്രാഞ്ച്: കഴക്കൂട്ടം\nIFSC: SIBL0000123",
-    plan:"test/new/test",
-    fullEstimate: "മേൽക്കൂര നീക്കം: ₹30,000\nട്രസ് പണി: ₹120,000\nടൈൽ പണി: ₹80,000\nസീലിംഗ് പണി: ₹60,000\nപെയിന്റിംഗ്: ₹40,000\nലേബർ ചാർജ്: ₹20,000\nമൊത്തം: ₹350,000",
-    
-    // Declarations
-    declaration1: true,
-    declaration2: true,
-    
-    // Additional fields for display
-    applicationId: "MFD/2025/078",
-    submissionDate: "2025-01-20",
-    status: "പരിഗണനയിൽ",
-    requestedAmount: "200000", // expectedExpense - ownContribution
-    
-    // Fund Collection History
-    monthlyFundCollection: "₹8,500",
-    lastFundSubmission: "ഡിസംബർ 2024",
-    totalFundContributed: "₹1,02,000 (2024 വർഷം)",
-    
-    // Mosque Specifications
-    mosqueCapacity: "250 പേർ",
-    constructionYear: "1984",
-    lastMaintenance: "2020",
-    mosqueFacilities: ["വുദുഖാന", "പാർക്കിംഗ്", "ജനറേറ്റർ", "സൗണ്ട് സിസ്റ്റം"],
-    
-    // Committee Details
-    committeeMembers: [
-      { position: "പ്രസിഡന്റ്", name: "സലിം ഹാജി", phone: "9876543201" },
-      { position: "സെക്രട്ടറി", name: "മുഹമ്മദ് ഫൈസൽ", phone: "9876543210" },
-      { position: "ട്രഷറർ", name: "ഇബ്രാഹിം സാഹിബ്", phone: "9876543202" }
-    ]
+    if (mosqueFundId) {
+      fetchMosqueFundDetails(mosqueFundId);
+    } else {
+      setError('No mosque fund data found');
+      setLoading(false);
+    }
+  }, [location.state]);
+
+  const fetchMosqueFundDetails = async (id) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/mosqueFund/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setFormData(data.data);
+      } else {
+        setError(data.message || 'Failed to fetch mosque fund details');
+      }
+    } catch (error) {
+      console.error('Fetch mosque fund details error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const showAlert = (message, type = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlertModal(false);
+    setAlertMessage('');
+  };
+
+  const handleConfirmClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = async () => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowConfirmModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/mosqueFund/${formData._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: 'approved'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert('Mosque fund application approved successfully!', 'success');
+        setShowConfirmModal(false);
+        // Update the local state
+        setFormData({ ...formData, status: 'approved' });
+      } else {
+        showAlert('Failed to approve application: ' + data.message, 'error');
+        setShowConfirmModal(false);
+      }
+    } catch (error) {
+      console.error('Approve application error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowConfirmModal(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectClick = () => {
+    setShowRejectModal(true);
+  };
+
+  const handleReject = async () => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        showAlert('No admin token found. Please login again.', 'error');
+        setShowRejectModal(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/mosqueFund/${formData._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: 'rejected'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert('Mosque fund application rejected successfully!', 'success');
+        setShowRejectModal(false);
+        // Update the local state
+        setFormData({ ...formData, status: 'rejected' });
+      } else {
+        showAlert('Failed to reject application: ' + data.message, 'error');
+        setShowRejectModal(false);
+      }
+    } catch (error) {
+      console.error('Reject application error:', error);
+      showAlert('Network error. Please try again.', 'error');
+      setShowRejectModal(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading mosque fund details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            Error: {error}
+          </h2>
+          <button 
+            onClick={handleBack}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+            ഡാറ്റ ലഭ്യമല്ല
+          </h2>
+          <button 
+            onClick={handleBack}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Use actual formData instead of dummy data
+  const displayData = formData || {};
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleDownload = () => {
-    alert('ഡൗൺലോഡ് ഫീച്ചർ ഉടൻ ലഭ്യമാകും');
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback to direct link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const handleApprove = () => {
-    alert('അപേക്ഷ അനുമതി നൽകി!');
+    handleConfirmClick();
   };
 
-  const handleReject = () => {
-    alert('അപേക്ഷ നിരസിച്ചു!');
+  const getFileType = (url) => {
+    if (!url) return 'unknown';
+    const extension = url.split('.').pop().toLowerCase();
+    if (extension === 'pdf') return 'pdf';
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) return 'image';
+    return 'unknown';
   };
+
+  const getFileTypeDisplay = (url) => {
+    const type = getFileType(url);
+    return type === 'pdf' ? 'PDF രേഖ' : 'ചിത്ര രേഖ';
+  };
+
+  const getViewButtonText = (url) => {
+    const type = getFileType(url);
+    return type === 'pdf' ? 'രേഖ കാണുക' : 'ചിത്രം കാണുക';
+  };
+
 
   const getStatusBadge = (status) => {
     const styles = {
@@ -95,51 +276,23 @@ const SuperAdminMosqueFundDetails = ({ onBack, onEdit }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Professional Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
+      <SuperAdminNavbar />
+      <div className="p-4">
+        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
+          <div className="flex items-center gap-3">
               <button 
-                onClick={onBack}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={handleBack}
+              className="p-2 hover:bg-green-700 rounded-full transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <Download className="w-6 h-6 text-white" />
-                </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Mosque Fund Application Details</h1>
-                  <p className="text-gray-600">Review and manage mosque fund application</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={onEdit}
-                className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
-              <button 
-                onClick={handlePrint}
-                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
-              <button 
-                onClick={handleDownload}
-                className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </button>
+              <h1 className="text-xl font-bold">മസ്ജിദ് ഫണ്ട് സഹായ അപേക്ഷ</h1>
+                <p className="text-green-100 text-sm">മസ്ജിദ് ഫണ്ട് അപേക്ഷ വിവരങ്ങൾ</p>
+                <p className="text-green-200 text-xs">അപേക്ഷ ഐഡി: {formData._id?.slice(-8) || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -147,147 +300,390 @@ const SuperAdminMosqueFundDetails = ({ onBack, onEdit }) => {
         <div className="space-y-6">
           {/* Application Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Application Summary</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">അപേക്ഷ സംഗ്രഹം</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Application ID</label>
-                <p className="text-lg font-bold text-purple-600">{formData.applicationId}</p>
+                <label className="text-sm font-medium text-gray-500">അപേക്ഷ ഐഡി</label>
+                <p className="text-lg font-bold text-purple-600">{displayData.applicationId || displayData._id?.slice(-8) || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Submission Date</label>
-                <p className="text-lg font-medium text-gray-900">{formData.submissionDate}</p>
+                <label className="text-sm font-medium text-gray-500">സമർപ്പണ തീയതി</label>
+                <p className="text-lg font-medium text-gray-900">{displayData.submissionDate || (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString() : 'N/A')}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Status</label>
-                <div className="mt-1">{getStatusBadge(formData.status)}</div>
+                <label className="text-sm font-medium text-gray-500">പ്രവേശനം</label>
+                <div className="mt-1">{getStatusBadge(displayData.status || 'pending')}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Requested Amount</label>
-                <p className="text-lg font-bold text-red-600">₹{formData.requestedAmount}</p>
+                <label className="text-sm font-medium text-gray-500">അഭ്യർത്ഥിച്ച തുക</label>
+                <p className="text-lg font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
               </div>
             </div>
           </div>
 
           {/* Mosque Basic Information */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mosque Information</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">മസ്ജിദ് വിവരങ്ങൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Mosque Name</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mosqueName}</p>
+                <label className="text-sm font-medium text-gray-500">മസ്ജിദിന്റെ പേര്</label>
+                <p className="text-lg font-medium text-gray-900">{displayData.mosqueName || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">MCK Affiliation Number</label>
-                <p className="text-lg font-medium text-gray-900">{formData.mckAffiliation}</p>
+                <label className="text-sm font-medium text-gray-500">എംസികെ അഫിലിയേഷൻ നമ്പർ</label>
+                <p className="text-lg font-medium text-gray-900">{displayData.mckAffiliation || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Management Type</label>
-                <p className="text-gray-900">{formData.managementType}</p>
+                <label className="text-sm font-medium text-gray-500">മാനേജിംഗ് കമ്മിറ്റി/ട്രസ്‌റ്റ്</label>
+                <p className="text-gray-900">{displayData.managementType || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">President/Chairman</label>
-                <p className="text-gray-900">{formData.presidentSecretary}</p>
+                <label className="text-sm font-medium text-gray-500">പ്രസിഡന്റ്/ചെയർമാൻ</label>
+                <p className="text-gray-900">{displayData.presidentSecretary || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p className="text-gray-900">{formData.phone}</p>
+                <label className="text-sm font-medium text-gray-500">ഫോൺ</label>
+                <p className="text-gray-900">{displayData.phone || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Jamath Islami Unit</label>
-                <p className="text-gray-900">{formData.jamathIslami}</p>
+                <label className="text-sm font-medium text-gray-500">ജമാത്ത് ഇസ്ലാമി പ്രാദേശിക ഘടകം</label>
+                <p className="text-gray-900">{displayData.jamathIslami || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Area</label>
-                <p className="text-gray-900">{formData.area}</p>
+                <label className="text-sm font-medium text-gray-500">ഏരിയ</label>
+                <p className="text-gray-900">{displayData.area || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">District</label>
-                <p className="text-gray-900">{formData.district}</p>
+                <label className="text-sm font-medium text-gray-500">ജില്ല</label>
+                <p className="text-gray-900">{displayData.district || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി</label>
+                <p className="text-gray-900">{displayData.mosqueOfficialName || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">ഫോൺ</label>
+                <p className="text-gray-900">{displayData.mosqueOfficialPhone || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">വാട്സാപ്പ് നമ്പർ</label>
+                <p className="text-gray-900">{displayData.whatsappNumber || 'N/A'}</p>
               </div>
             </div>
             <div className="mt-4">
-              <label className="text-sm font-medium text-gray-500">Full Address</label>
-              <p className="text-gray-900 whitespace-pre-wrap">{formData.address}</p>
+              <label className="text-sm font-medium text-gray-500">വിലാസം</label>
+              <p className="text-gray-900 whitespace-pre-wrap">{displayData.address || 'N/A'}</p>
             </div>
           </div>
 
           {/* Fund Collection History */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Previous Help Information</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">മുൻ സഹായ വിവരങ്ങൾ</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Monthly Fund Collection</label>
-                <p className="text-lg font-medium text-green-600">{formData.mckFundService}</p>
+                <label className="text-sm font-medium text-gray-500">മാസിക ഫണ്ട് ശേഖരണം</label>
+                <p className="text-lg font-medium text-green-600">{displayData.mckFundService || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Previous Help Received</label>
-                <p className="text-lg font-medium text-gray-900">{formData.previousHelp}</p>
+                <label className="text-sm font-medium text-gray-500">മുൻ സഹായം ലഭിച്ചത്</label>
+                <p className="text-lg font-medium text-gray-900">{displayData.previousHelp || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           {/* Current Help Request */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Help Request</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">നിലവിലെ സഹായ അഭ്യർത്ഥന</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Help Required For</label>
-                <p className="text-lg font-medium text-purple-600">{formData.helpPurpose}</p>
+                <label className="text-sm font-medium text-gray-500">സഹായം ആവശ്യമുള്ളത്</label>
+                <p className="text-lg font-medium text-purple-600">{displayData.helpPurpose || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Detailed Description</label>
-                <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{formData.needDescription}</p>
+                <label className="text-sm font-medium text-gray-500">വിശദ വിവരണം</label>
+                <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">{displayData.needDescription || 'N/A'}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <label className="text-sm font-medium text-gray-500">പ്രതീക്ഷിക്കുന്ന ചെലവ്</label>
+                  <p className="text-xl font-bold text-red-600">₹{displayData.expectedExpense || '0'}</p>
+                </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">Own Contribution</label>
-                  <p className="text-xl font-bold text-green-600">₹{formData.ownContribution}</p>
+                  <label className="text-sm font-medium text-gray-500">സ്വന്തം സംഭാവന</label>
+                  <p className="text-xl font-bold text-green-600">₹{displayData.ownContribution || '0'}</p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <label className="text-sm font-medium text-gray-500">Requested Amount</label>
-                  <p className="text-xl font-bold text-blue-600">₹{formData.requestedAmount}</p>
+                  <label className="text-sm font-medium text-gray-500">ആവശ്യപ്പെടുന്ന തുക</label>
+                  <p className="text-xl font-bold text-blue-600">₹{(parseInt(displayData.expectedExpense || 0) - parseInt(displayData.ownContribution || 0)).toLocaleString()}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bank Details */}
+          {/* Required Documents */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Required Documents</h2>
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <label className="text-sm font-medium text-gray-500 block mb-2">Bank Passbook Details</label>
-                <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.bankPassbook}</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">ആവശ്യമായ രേഖകൾ</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Bank Passbook Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-blue-900">ബാങ്ക് പാസ്ബുക്ക്</h3>
+                  <div className="flex items-center text-blue-600">
+                    {getFileType(displayData.bankPassbook) === 'pdf' ? (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {getFileTypeDisplay(displayData.bankPassbook)}
+                  </div>
+                </div>
+                
+                {displayData.bankPassbook && displayData.bankPassbook.startsWith('http') ? (
+                  <div className="flex gap-2">
+                      <a 
+                        href={displayData.bankPassbook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {getViewButtonText(displayData.bankPassbook)}
+                      </a>
+                      <button 
+                        onClick={() => handleDownload(displayData.bankPassbook, `bank-passbook-${displayData._id?.slice(-8) || 'document'}.pdf`)}
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        ഡൗൺലോഡ്
+                      </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-sm">ബാങ്ക് പാസ്ബുക്ക് അപ്ലോഡ് ചെയ്തിട്ടില്ല</p>
+                  </div>
+                )}
               </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <label className="text-sm font-medium text-gray-500 block mb-2">Plan & Estimate Details</label>
-                <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">{formData.plan}</p>
+
+              {/* Plan & Estimate Card */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-green-900">പദ്ധതി & കണക്ക്</h3>
+                  <div className="flex items-center text-green-600">
+                    {getFileType(displayData.fullEstimate) === 'pdf' ? (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {getFileTypeDisplay(displayData.fullEstimate)}
+                  </div>
+                </div>
+                
+                {displayData.fullEstimate && displayData.fullEstimate.startsWith('http') ? (
+                  <div className="flex gap-2">
+                      <a 
+                        href={displayData.fullEstimate}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {getViewButtonText(displayData.fullEstimate)}
+                      </a>
+                      <button 
+                        onClick={() => handleDownload(displayData.fullEstimate, `plan-estimate-${displayData._id?.slice(-8) || 'document'}.pdf`)}
+                        className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        ഡൗൺലോഡ്
+                      </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-sm">പദ്ധതി & കണക്ക് അപ്ലോഡ് ചെയ്തിട്ടില്ല</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Super Admin Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Super Admin Actions</h2>
-            <div className="flex justify-between mt-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">അപേക്ഷ പ്രവേശനം</h2>
+            
+            {/* Show buttons only if status is pending */}
+            {displayData.status === 'pending' ? (
+              <div className="flex gap-3">
               <button 
                 onClick={handleApprove}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  അനുമതി
+                </button>
+                <button 
+                  onClick={handleRejectClick}
+                  className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  നിരസിക്കുക
+                </button>
+              </div>
+            ) : (
+              /* Show simple status if already processed */
+              <div className="text-center py-4">
+                {displayData.status === 'approved' ? (
+                  <div className="flex items-center justify-center gap-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Approved</span>
+                  </div>
+                ) : displayData.status === 'rejected' ? (
+                  <div className="flex items-center justify-center gap-2 text-red-600">
+                    <XCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Rejected</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 text-yellow-600">
+                    <AlertCircle className="w-5 h-5" />
+                    <span className="font-medium">Application Pending</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900">Confirm Approval</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to approve this mosque fund application? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={actionLoading}
               >
-                <CheckCircle className="w-5 h-5" />
-                Approve Application
+                Cancel
               </button>
-              <button 
-                onClick={handleReject}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors"
+              <button
+                onClick={handleConfirm}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                disabled={actionLoading}
               >
-                <XCircle className="w-5 h-5" />
-                Reject Application
+                {actionLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Approving...
+                  </div>
+                ) : (
+                  'Approve Application'
+                )}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <XCircle className="w-8 h-8 text-red-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900">Confirm Rejection</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to reject this mosque fund application? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleReject}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Rejecting...
+                  </div>
+                ) : (
+                  'Reject Application'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {showAlertModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              {alertType === 'success' && <CheckCircle className="w-8 h-8 text-green-600 mr-3" />}
+              {alertType === 'error' && <XCircle className="w-8 h-8 text-red-600 mr-3" />}
+              {alertType === 'warning' && <AlertCircle className="w-8 h-8 text-yellow-600 mr-3" />}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {alertType === 'success' && 'Success'}
+                {alertType === 'error' && 'Error'}
+                {alertType === 'warning' && 'Warning'}
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">{alertMessage}</p>
+            <div className="flex justify-end">
+              <button
+                onClick={closeAlert}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
