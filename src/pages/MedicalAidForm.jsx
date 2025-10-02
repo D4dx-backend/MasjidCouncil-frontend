@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -20,9 +20,9 @@ const MedicalAidForm = () => {
     presidentChairman: '',
     
     // Jamaat Details
-    jammatDetails: '',
-    area: '',
     district: '',
+    area: '',
+    jammatDetails: '',
     
     // Application Details
     applicantDetails: '',
@@ -41,6 +41,12 @@ const MedicalAidForm = () => {
 
   const [validationErrors, setValidationErrors] = useState({});
 
+  // State for dropdown data
+  const [districts, setDistricts] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [loadingDropdowns, setLoadingDropdowns] = useState(false);
+
   const validateField = (fieldName, value) => {
     let isValid = true;
     
@@ -58,15 +64,169 @@ const MedicalAidForm = () => {
     return isValid;
   };
 
+  // Fetch districts from external API
+  const fetchDistricts = async () => {
+    setLoadingDropdowns(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const result = await response.json();
+      
+      if (result.success && result.districts && Array.isArray(result.districts)) {
+        setDistricts(result.districts);
+      } else {
+        setDistricts(getFallbackDistricts());
+      }
+    } catch (error) {
+      setDistricts(getFallbackDistricts());
+    } finally {
+      setLoadingDropdowns(false);
+    }
+  };
+
+  // Fetch areas for a specific district
+  const fetchAreasForDistrict = async (districtId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const result = await response.json();
+      
+      if (result.success && result.areas && Array.isArray(result.areas)) {
+        setAreas(result.areas);
+        return result.areas;
+      } else {
+        const fallbackAreas = getFallbackAreas();
+        setAreas(fallbackAreas);
+        return fallbackAreas;
+      }
+    } catch (error) {
+      const fallbackAreas = getFallbackAreas();
+      setAreas(fallbackAreas);
+      return fallbackAreas;
+    }
+  };
+
+  // Fetch units for a specific area
+  const fetchUnitsForArea = async (areaId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/units/${areaId}`);
+      const result = await response.json();
+      
+      if (result.success && result.units && Array.isArray(result.units)) {
+        setUnits(result.units);
+        return result.units;
+      } else {
+        const fallbackUnits = getFallbackUnits();
+        setUnits(fallbackUnits);
+        return fallbackUnits;
+      }
+    } catch (error) {
+      const fallbackUnits = getFallbackUnits();
+      setUnits(fallbackUnits);
+      return fallbackUnits;
+    }
+  };
+
+  // Fallback data for districts
+  const getFallbackDistricts = () => [
+    { id: 1, title: 'Kozhikode', name: 'Kozhikode' },
+    { id: 2, title: 'Malappuram', name: 'Malappuram' },
+    { id: 3, title: 'Kannur', name: 'Kannur' },
+    { id: 4, title: 'Kasaragod', name: 'Kasaragod' },
+    { id: 5, title: 'Wayanad', name: 'Wayanad' },
+    { id: 6, title: 'Thrissur', name: 'Thrissur' },
+    { id: 7, title: 'Ernakulam', name: 'Ernakulam' },
+    { id: 8, title: 'Kottayam', name: 'Kottayam' },
+    { id: 9, title: 'Alappuzha', name: 'Alappuzha' },
+    { id: 10, title: 'Pathanamthitta', name: 'Pathanamthitta' },
+    { id: 11, title: 'Kollam', name: 'Kollam' },
+    { id: 12, title: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
+    { id: 13, title: 'Palakkad', name: 'Palakkad' },
+    { id: 14, title: 'Idukki', name: 'Idukki' }
+  ];
+
+  // Fallback data for areas
+  const getFallbackAreas = () => [
+    { id: 1, title: 'Kozhikode City', name: 'Kozhikode City' },
+    { id: 2, title: 'Feroke', name: 'Feroke' },
+    { id: 3, title: 'Koyilandy', name: 'Koyilandy' },
+    { id: 4, title: 'Vadakara', name: 'Vadakara' },
+    { id: 5, title: 'Thiruvambady', name: 'Thiruvambady' },
+    { id: 6, title: 'Koduvally', name: 'Koduvally' },
+    { id: 7, title: 'Balussery', name: 'Balussery' },
+    { id: 8, title: 'Perambra', name: 'Perambra' },
+    { id: 9, title: 'Thiruvallur', name: 'Thiruvallur' },
+    { id: 10, title: 'Elathur', name: 'Elathur' }
+  ];
+
+  // Fallback data for units
+  const getFallbackUnits = () => [
+    { id: 1, title: 'Unit 1', name: 'Unit 1' },
+    { id: 2, title: 'Unit 2', name: 'Unit 2' },
+    { id: 3, title: 'Unit 3', name: 'Unit 3' },
+    { id: 4, title: 'Unit 4', name: 'Unit 4' },
+    { id: 5, title: 'Unit 5', name: 'Unit 5' }
+  ];
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === 'district') {
+      // When district changes, fetch areas for that district
+      setFormData(prev => ({
+        ...prev,
+        district: value,
+        area: '', // Reset area when district changes
+        jammatDetails: '' // Reset unit when district changes
+      }));
+      
+      // Find the district ID to fetch areas
+      const selectedDistrict = districts.find(d => 
+        (d.title || d.name) === value
+      );
+      
+      if (selectedDistrict && selectedDistrict.id) {
+        fetchAreasForDistrict(selectedDistrict.id);
+      } else {
+        // If no district ID found, use fallback areas
+        const fallbackAreas = getFallbackAreas();
+        setAreas(fallbackAreas);
+      }
+    } else if (name === 'area') {
+      // When area changes, fetch units for that area
+      setFormData(prev => ({
+        ...prev,
+        area: value,
+        jammatDetails: '' // Reset unit when area changes
+      }));
+      
+      // Find the area ID to fetch units
+      const selectedArea = areas.find(a => 
+        (a.title || a.name) === value
+      );
+      
+      if (selectedArea && selectedArea.id) {
+        fetchUnitsForArea(selectedArea.id);
+      } else {
+        // If no area ID found, use fallback units
+        const fallbackUnits = getFallbackUnits();
+        setUnits(fallbackUnits);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+    
     validateField(name, value);
   };
   const navigate = useNavigate();
+
+  // Fetch districts when form is shown
+  useEffect(() => {
+    if (showForm) {
+      fetchDistricts();
+    }
+  }, [showForm]);
 
 
   const validateMobileNumber = (number) => {
@@ -127,9 +287,9 @@ const MedicalAidForm = () => {
           whatsapp: '',
           presidentPhone: '',
           presidentChairman: '',
-          jammatDetails: '',
-          area: '',
           district: '',
+          area: '',
+          jammatDetails: '',
           applicantDetails: '',
           chairmanDesignation: '',
           salary: '',
@@ -408,48 +568,73 @@ const MedicalAidForm = () => {
         {/* Jamaat Details Section */}
         <div className="border rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>ജമാഅത്തിന്റെ ഇസ്ലാമി വിവരങ്ങൾ</h2>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              ജമാഅത്തിന്റെ പ്രാദേശിക ഘടകം
-            </label>
-            <input
-            style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
-              type="text"
-              name="jammatDetails"
-              value={formData.jammatDetails}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ഏരിയ
-              </label>
-              <input
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
-                type="text"
-                name="area"
-                value={formData.area}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
                 ജില്ല
               </label>
-              <input
-              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
-                type="text"
+              <select
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-              />
+                disabled={loadingDropdowns}
+                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              >
+                <option value="">{loadingDropdowns ? "ലോഡ് ചെയ്യുന്നു..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}</option>
+                {Array.isArray(districts) && districts.map((district) => (
+                  <option key={district.id || district._id} value={district.title || district.name}>
+                    {district.title || district.name}
+                  </option>
+                ))}
+              </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                ഏരിയ
+              </label>
+              <select
+                name="area"
+                value={formData.area}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={loadingDropdowns || !formData.district}
+                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+              >
+                <option value="">
+                  {!formData.district ? 'ആദ്യം ജില്ല തിരഞ്ഞെടുക്കുക' : 'ഏരിയ തിരഞ്ഞെടുക്കുക'}
+                </option>
+                {Array.isArray(areas) && areas.map((area) => (
+                  <option key={area.id || area._id} value={area.title || area.name}>
+                    {area.title || area.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2"style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+              ജമാഅത്തിന്റെ പ്രാദേശിക ഘടകം
+            </label>
+            <select
+              name="jammatDetails"
+              value={formData.jammatDetails}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loadingDropdowns || !formData.area}
+              style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+            >
+              <option value="">
+                {!formData.area ? 'ആദ്യം ഏരിയ തിരഞ്ഞെടുക്കുക' : 'യൂണിറ്റ് തിരഞ്ഞെടുക്കുക'}
+              </option>
+              {Array.isArray(units) && units.map((unit) => (
+                <option key={unit.id || unit._id} value={unit.title || unit.name}>
+                  {unit.title || unit.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
+import logo from "../assets/logo.png";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const AffiliationForm = () => {
   const [formData, setFormData] = useState({
@@ -76,6 +77,20 @@ const AffiliationForm = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  
+  // External API data states
+  const [districts, setDistricts] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [filteredAreas, setFilteredAreas] = useState([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [loadingAreas, setLoadingAreas] = useState(false);
+  const [apiError, setApiError] = useState(null);
+
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(''); // 'success' or 'error'
+  const [modalMessage, setModalMessage] = useState('');
+  const [trackingId, setTrackingId] = useState('');
 
   const facilities = [
     "മദ്രസ",
@@ -119,9 +134,184 @@ const AffiliationForm = () => {
     "കരിയർ ഹെൽപ് സെൻ്റർ",
   ];
 
+
+  // Fallback data for districts
+  const getFallbackDistricts = () => [
+    { id: 1, name: 'Kozhikode', districtName: 'Kozhikode' },
+    { id: 2, name: 'Malappuram', districtName: 'Malappuram' },
+    { id: 3, name: 'Kannur', districtName: 'Kannur' },
+    { id: 4, name: 'Kasaragod', districtName: 'Kasaragod' },
+    { id: 5, name: 'Wayanad', districtName: 'Wayanad' },
+    { id: 6, name: 'Thrissur', districtName: 'Thrissur' },
+    { id: 7, name: 'Ernakulam', districtName: 'Ernakulam' },
+    { id: 8, name: 'Kottayam', districtName: 'Kottayam' },
+    { id: 9, name: 'Alappuzha', districtName: 'Alappuzha' },
+    { id: 10, name: 'Pathanamthitta', districtName: 'Pathanamthitta' },
+    { id: 11, name: 'Kollam', districtName: 'Kollam' },
+    { id: 12, name: 'Thiruvananthapuram', districtName: 'Thiruvananthapuram' },
+    { id: 13, name: 'Palakkad', districtName: 'Palakkad' },
+    { id: 14, name: 'Idukki', districtName: 'Idukki' }
+  ];
+
+  // Fallback data for areas
+  const getFallbackAreas = () => [
+    { id: 1, name: 'Kozhikode City', areaName: 'Kozhikode City' },
+    { id: 2, name: 'Feroke', areaName: 'Feroke' },
+    { id: 3, name: 'Koyilandy', areaName: 'Koyilandy' },
+    { id: 4, name: 'Vadakara', areaName: 'Vadakara' },
+    { id: 5, name: 'Thiruvambady', areaName: 'Thiruvambady' },
+    { id: 6, name: 'Koduvally', areaName: 'Koduvally' },
+    { id: 7, name: 'Balussery', areaName: 'Balussery' },
+    { id: 8, name: 'Perambra', areaName: 'Perambra' },
+    { id: 9, name: 'Thiruvallur', areaName: 'Thiruvallur' },
+    { id: 10, name: 'Elathur', areaName: 'Elathur' }
+  ];
+
+
+  // Fetch districts from external API (Updated for Malarvadi pattern)
+  const fetchDistricts = async () => {
+    setLoadingDistricts(true);
+    setApiError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/districts`);
+      const result = await response.json();
+      
+      if (result.success && result.districts && Array.isArray(result.districts)) {
+        setDistricts(result.districts);
+        console.log('Districts loaded from new API:', result.districts);
+      } else {
+        console.warn('New API failed, using fallback data');
+        console.log('API Response:', result);
+        setDistricts(getFallbackDistricts());
+      }
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+      setApiError('Failed to load districts from new API');
+      setDistricts(getFallbackDistricts());
+    } finally {
+      setLoadingDistricts(false);
+    }
+  };
+
+  // Filter areas by district (client-side filtering like SuperAdminDashboard)
+  const filterAreasByDistrict = (districtName) => {
+    if (!districtName) {
+      setFilteredAreas([]);
+      return;
+    }
+
+    const filtered = areas.filter(area => 
+      (area.district && area.district.title === districtName) || 
+      (area.district && area.district.title === '') || 
+      !area.district
+    );
+    
+    setFilteredAreas(filtered);
+    console.log(`Filtered areas for district ${districtName}:`, filtered);
+  };
+
+  // Fetch areas for a specific district using new Malarvadi pattern
+  const fetchAreasForDistrict = async (districtId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mosqueAffiliation/external/areas/${districtId}`);
+      const result = await response.json();
+      
+      if (result.success && result.areas && Array.isArray(result.areas)) {
+        setAreas(result.areas);
+        setFilteredAreas(result.areas);
+        console.log(`Areas loaded for district ${districtId}:`, result.areas);
+        return result.areas;
+      } else {
+        console.warn(`Failed to fetch areas for district ${districtId}, using fallback`);
+        const fallbackAreas = getFallbackAreas();
+        setAreas(fallbackAreas);
+        setFilteredAreas(fallbackAreas);
+        return fallbackAreas;
+      }
+    } catch (error) {
+      console.error(`Error fetching areas for district ${districtId}:`, error);
+      const fallbackAreas = getFallbackAreas();
+      setAreas(fallbackAreas);
+      setFilteredAreas(fallbackAreas);
+      return fallbackAreas;
+    }
+  };
+
+  // Fetch all areas from external API (for initial load) - Updated for Malarvadi pattern
+  const fetchAreas = async () => {
+    setLoadingAreas(true);
+    setApiError(null);
+    
+    try {
+      // Note: The new API requires districtId for areas, so we'll use fallback for now
+      // In a real implementation, you'd need to fetch areas per district
+      console.warn('New API requires districtId for areas, using fallback data');
+      const fallbackAreas = getFallbackAreas();
+      setAreas(fallbackAreas);
+      setFilteredAreas(fallbackAreas);
+    } catch (error) {
+      console.error('Error fetching areas:', error);
+      setApiError('Failed to load areas from new API');
+      const fallbackAreas = getFallbackAreas();
+      setAreas(fallbackAreas);
+      setFilteredAreas(fallbackAreas);
+    } finally {
+      setLoadingAreas(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    console.log('AffiliationForm mounted, fetching external API data...');
+    // Ensure we start with fallback data immediately
+    setDistricts(getFallbackDistricts());
+    const fallbackAreas = getFallbackAreas();
+    setAreas(fallbackAreas);
+    setFilteredAreas(fallbackAreas);
+    // Then try to fetch from API
+    fetchDistricts();
+    fetchAreas();
+  }, []);
+
+
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     validateField(field, value);
+    
+    // Handle district change to fetch areas dynamically
+    if (field === 'district' && value) {
+      // Find the district ID to fetch areas
+      const selectedDistrict = districts.find(d => 
+        (d.title || d.name || d.districtName) === value
+      );
+      
+      if (selectedDistrict && selectedDistrict.id) {
+        fetchAreasForDistrict(selectedDistrict.id);
+      } else {
+        // If no district ID found, use fallback areas
+        const fallbackAreas = getFallbackAreas();
+        setAreas(fallbackAreas);
+        setFilteredAreas(fallbackAreas);
+      }
+    }
+    
+    // Handle jamaat district change to fetch areas dynamically
+    if (field === 'jamaatDistrict' && value) {
+      // Find the district ID to fetch areas
+      const selectedDistrict = districts.find(d => 
+        (d.title || d.name || d.districtName) === value
+      );
+      
+      if (selectedDistrict && selectedDistrict.id) {
+        fetchAreasForDistrict(selectedDistrict.id);
+      } else {
+        // If no district ID found, use fallback areas
+        const fallbackAreas = getFallbackAreas();
+        setAreas(fallbackAreas);
+        setFilteredAreas(fallbackAreas);
+      }
+    }
   };
 
   const handleNestedInputChange = (parent, field, value) => {
@@ -184,6 +374,33 @@ const AffiliationForm = () => {
     return emailRegex.test(email);
   };
 
+  const validatePincode = (pincode) => {
+    const pincodeRegex = /^[0-9]+$/;
+    return pincodeRegex.test(pincode);
+  };
+
+  // Modal functions
+  const showSuccessModal = (message, id) => {
+    setModalType('success');
+    setModalMessage(message);
+    setTrackingId(id);
+    setShowModal(true);
+  };
+
+  const showErrorModal = (message) => {
+    setModalType('error');
+    setModalMessage(message);
+    setTrackingId('');
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalMessage('');
+    setTrackingId('');
+    setModalType('');
+  };
+
   const validateField = (fieldName, value) => {
     let isValid = true;
 
@@ -207,6 +424,12 @@ const AffiliationForm = () => {
       }
     }
 
+    if (fieldName === "pincode") {
+      if (value && !validatePincode(value)) {
+        isValid = false;
+      }
+    }
+
     setValidationErrors((prev) => ({
       ...prev,
       [fieldName]: !isValid,
@@ -221,7 +444,7 @@ const AffiliationForm = () => {
 
     // Mobile number validation
     if (formData.phone && !validateMobileNumber(formData.phone)) {
-      alert("ദയവായി സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      showErrorModal("ദയവായി സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
       return;
     }
 
@@ -229,7 +452,7 @@ const AffiliationForm = () => {
       formData.president.mobile &&
       !validateMobileNumber(formData.president.mobile)
     ) {
-      alert("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      showErrorModal("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
       return;
     }
 
@@ -237,23 +460,29 @@ const AffiliationForm = () => {
       formData.secretary.mobile &&
       !validateMobileNumber(formData.secretary.mobile)
     ) {
-      alert("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
+      showErrorModal("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക");
       return;
     }
 
     // Email validation
     if (formData.email && !validateEmail(formData.email)) {
-      alert("ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      showErrorModal("ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
       return;
     }
 
     if (formData.president.email && !validateEmail(formData.president.email)) {
-      alert("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      showErrorModal("ദയവായി പ്രസിഡന്റിന്റെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
       return;
     }
 
     if (formData.secretary.email && !validateEmail(formData.secretary.email)) {
-      alert("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      showErrorModal("ദയവായി സെക്രട്ടറിയുടെ സാധുവായ ഇമെയിൽ വിലാസം നൽകുക");
+      return;
+    }
+
+    // Pincode validation
+    if (formData.pincode && !validatePincode(formData.pincode)) {
+      showErrorModal("ദയവായി പിൻകോഡിൽ അക്കങ്ങൾ മാത്രം നൽകുക");
       return;
     }
 
@@ -264,7 +493,7 @@ const AffiliationForm = () => {
       !formData.localityAddress ||
       !formData.yearStarted
     ) {
-      alert("ദയവായി എല്ലാ അടിസ്ഥാന വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      showErrorModal("ദയവായി എല്ലാ അടിസ്ഥാന വിവരങ്ങളും പൂരിപ്പിക്കുക");
       return;
     }
 
@@ -274,19 +503,104 @@ const AffiliationForm = () => {
       !formData.pincode ||
       !formData.phone
     ) {
-      alert("ദയവായി എല്ലാ വിലാസ വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      showErrorModal("ദയവായി എല്ലാ വിലാസ വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      return;
+    }
+
+    // Validate Jamaat-e-Islami section
+    if (!formData.jamaatDistrict) {
+      showErrorModal("ദയവായി ജമാഅത്തെ ഇസ്‌ലാമി ജില്ല തിരഞ്ഞെടുക്കുക");
+      return;
+    }
+
+    if (!formData.area) {
+      showErrorModal("ദയവായി ജമാഅത്തെ ഇസ്‌ലാമി ഏരിയ തിരഞ്ഞെടുക്കുക");
       return;
     }
 
     // Additional validation for committee details
     if (!formData.committeeType) {
-      alert("ദയവായി മാനേജിംഗ് കമ്മിറ്റിയുടെ തരം തിരഞ്ഞെടുക്കുക");
+      showErrorModal("ദയവായി മാനേജിംഗ് കമ്മിറ്റിയുടെ തരം തിരഞ്ഞെടുക്കുക");
       return;
     }
 
     if (!formData.president.name || !formData.secretary.name) {
-      alert("ദയവായി പ്രസിഡന്റിന്റെയും സെക്രട്ടറിയുടെയും പേര് നൽകുക");
+      showErrorModal("ദയവായി പ്രസിഡന്റിന്റെയും സെക്രട്ടറിയുടെയും പേര് നൽകുക");
       return;
+    }
+
+    // Validate financial details
+    if (!formData.financialAssets || formData.financialAssets.trim() === "") {
+      showErrorModal("ദയവായി പള്ളിയുടെ സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ നൽകുക");
+      return;
+    }
+
+    if (!formData.incomeSource || formData.incomeSource.trim() === "") {
+      showErrorModal("ദയവായി വരുമാന മാർഗ്ഗങ്ങൾ നൽകുക");
+      return;
+    }
+
+    if (!formData.monthlyExpenses || formData.monthlyExpenses.trim() === "") {
+      showErrorModal("ദയവായി പ്രതിമാസ ചെലവ് നൽകുക");
+      return;
+    }
+
+    // Validate account details
+    if (!formData.totalIncome || formData.totalIncome.trim() === "") {
+      showErrorModal("ദയവായി കഴിഞ്ഞ വർഷത്തെ മൊത്തം വരവ് നൽകുക");
+      return;
+    }
+
+    if (!formData.totalExpense || formData.totalExpense.trim() === "") {
+      showErrorModal("ദയവായി കഴിഞ്ഞ വർഷത്തെ മൊത്തം ചെലവ് നൽകുക");
+      return;
+    }
+
+    // Validate cemetery field
+    if (!formData.hasCemetery) {
+      showErrorModal("ദയവായി ഖബറിസ്ഥാൻ ഉണ്ടോ എന്ന് തിരഞ്ഞെടുക്കുക");
+      return;
+    }
+
+    // Validate mosque capacity and area
+    if (!formData.specialtyDescription || formData.specialtyDescription.trim() === "") {
+      showErrorModal("ദയവായി പള്ളിയിൽ എത്ര പേർക്ക് നമസ്‌കരിക്കാമെന്ന് നൽകുക");
+      return;
+    }
+
+    if (!formData.category || formData.category.trim() === "") {
+      showErrorModal("ദയവായി പള്ളിയുടെ വിസ്തീർണം നൽകുക");
+      return;
+    }
+
+    // Validate outstate staff fields
+    if (!formData.hasOutstateStaff) {
+      showErrorModal("ദയവായി അന്യ സംസ്ഥാന ജീവനക്കാർ ഉണ്ടോ എന്ന് തിരഞ്ഞെടുക്കുക");
+      return;
+    }
+
+    if (!formData.followsOutstateProcedures) {
+      showErrorModal("ദയവായി അന്യ സംസ്ഥാന ജീവനക്കാരെ നിയമിക്കുമ്പോൾ ആവശ്യമായ നടപടിക്രമങ്ങൾ പാലിക്കാറുണ്ടോ എന്ന് തിരഞ്ഞെടുക്കുക");
+      return;
+    }
+
+    // Validate staff details - all staff must have required fields
+    if (formData.staff && formData.staff.length > 0) {
+      for (let i = 0; i < formData.staff.length; i++) {
+        const staff = formData.staff[i];
+        if (!staff.age || staff.age.trim() === "") {
+          showErrorModal(`ദയവായി ജീവനക്കാരുടെ വയസ്സ് നൽകുക (വരി ${i + 1})`);
+          return;
+        }
+        if (!staff.salary || staff.salary.trim() === "") {
+          showErrorModal(`ദയവായി ജീവനക്കാരുടെ ശമ്പളം നൽകുക (വരി ${i + 1})`);
+          return;
+        }
+        if (!staff.qualification || staff.qualification.trim() === "") {
+          showErrorModal(`ദയവായി ജീവനക്കാരുടെ യോഗ്യത നൽകുക (വരി ${i + 1})`);
+          return;
+        }
+      }
     }
 
     try {
@@ -307,13 +621,17 @@ const AffiliationForm = () => {
       );
 
       console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       const result = await response.json();
       console.log("Response data:", result);
+      console.log("Response success:", result.success);
+      console.log("Response message:", result.message);
 
       if (result.success) {
-        alert(
-          `അപേക്ഷ സമർപ്പിച്ചു! അഫിലിയേഷൻ നമ്പർ: ${result.data.affiliationNumber}`
+        showSuccessModal(
+          "അപേക്ഷ സമർപ്പിച്ചു!",
+          result.data.affiliationNumber || 'N/A'
         );
         // Reset form after successful submission
         setFormData({
@@ -362,12 +680,13 @@ const AffiliationForm = () => {
           followsOutstateProcedures: "",
         });
       } else {
-        alert(`പിശക്: ${result.message}`);
+        console.error("Form submission failed:", result);
+        showErrorModal(`പിശക്: ${result.message || 'Unknown error occurred'}`);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       console.error("Error details:", error.message);
-      alert(
+      showErrorModal(
         "അപേക്ഷ സമർപ്പിക്കുന്നതിൽ പിശക് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക."
       );
     }
@@ -407,7 +726,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  1. പള്ളിയുടെ പേര്
+                  1. പള്ളിയുടെ പേര് <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -423,7 +742,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  2. പള്ളിയുടെ സ്വഭാവം
+                  2. പള്ളിയുടെ സ്വഭാവം <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.mosqueAddress}
@@ -469,7 +788,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  3. മഹല്ലിന്‍റെ സ്വഭാവം
+                  3. മഹല്ലിന്‍റെ സ്വഭാവം <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.localityAddress}
@@ -509,7 +828,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  4. പള്ളി പ്രവർത്തനമാരംഭിച്ച വർഷം
+                  4. പള്ളി പ്രവർത്തനമാരംഭിച്ച വർഷം <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -537,7 +856,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  പൂർണ വിലാസം
+                  പൂർണ വിലാസം <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.completeAddress}
@@ -554,30 +873,48 @@ const AffiliationForm = () => {
                     className="block text-sm font-medium mb-2"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    ജില്ല
+                    ജില്ല <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.district}
                     onChange={(e) =>
                       handleInputChange("district", e.target.value)
                     }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                    disabled={loadingDistricts}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">
+                      {loadingDistricts ? "ലോഡിംഗ്..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}
+                    </option>
+                    {Array.isArray(districts) && districts.map((district) => (
+                      <option key={district.id} value={district.title || district.name || district.districtName}>
+                        {district.title || district.name || district.districtName}
+                      </option>
+                    ))}
+                  </select>
+                  {apiError && (
+                    <p className="text-sm text-orange-600 mt-1">
+                      ⚠️ {apiError} - Using fallback data
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label
                     className="block text-sm font-medium mb-2"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    പിൻകോഡ്
+                    പിൻകോഡ് <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.pincode}
-                    onChange={(e) =>
-                      handleInputChange("pincode", e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits
+                      if (/^\d*$/.test(value)) {
+                        handleInputChange("pincode", value);
+                      }
+                    }}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -586,12 +923,18 @@ const AffiliationForm = () => {
                     className="block text-sm font-medium mb-2"
                     style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                   >
-                    ഫോൺ നമ്പർ 
+                    ഫോൺ നമ്പർ <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits
+                      if (/^\d*$/.test(value)) {
+                        handleInputChange("phone", value);
+                      }
+                    }}
                     className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       validationErrors.phone
                         ? "border-red-500"
@@ -653,30 +996,70 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  ഏരിയ
+                  ജില്ല <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.area}
-                  onChange={(e) => handleInputChange("area", e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <select
+                  value={formData.jamaatDistrict}
+                  onChange={(e) => {
+                    const selectedDistrict = e.target.value;
+                    handleInputChange("jamaatDistrict", selectedDistrict);
+                    // Clear area when district changes
+                    handleInputChange("area", "");
+                    // Filter areas for the selected district
+                    filterAreasByDistrict(selectedDistrict);
+                  }}
+                  disabled={loadingDistricts}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">
+                    {loadingDistricts ? "ലോഡിംഗ്..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}
+                  </option>
+           {Array.isArray(districts) && districts.map((district) => (
+             <option key={district.id} value={district.title || district.name || district.districtName}>
+               {district.title || district.name || district.districtName}
+             </option>
+           ))}
+                </select>
               </div>
               <div>
                 <label
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  ജില്ല
+                  ഏരിയ <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.jamaatDistrict}
-                  onChange={(e) =>
-                    handleInputChange("jamaatDistrict", e.target.value)
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <select
+                  value={formData.area}
+                  onChange={(e) => handleInputChange("area", e.target.value)}
+                  disabled={loadingAreas || !formData.jamaatDistrict}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">
+                    {!formData.jamaatDistrict 
+                      ? "ആദ്യം ജില്ല തിരഞ്ഞെടുക്കുക" 
+                      : loadingAreas 
+                        ? "ലോഡിംഗ്..." 
+                        : filteredAreas.length === 0
+                          ? "ഈ ജില്ലയിൽ ഏരിയകൾ ഇല്ല"
+                          : "ഏരിയ തിരഞ്ഞെടുക്കുക"
+                    }
+                  </option>
+           {Array.isArray(filteredAreas) && filteredAreas.map((area) => (
+             <option key={area.id} value={area.title || area.name || area.areaName}>
+               {area.title || area.name || area.areaName}
+             </option>
+           ))}
+                </select>
+                {/* {!formData.jamaatDistrict && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    ആദ്യം ജില്ല തിരഞ്ഞെടുക്കുക
+                  </p>
+                )} */}
+                {apiError && (
+                  <p className="text-sm text-orange-600 mt-1">
+                    ⚠️ {apiError} - Using fallback data
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -723,7 +1106,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  ഖബറിസ്ഥാൻ ഉണ്ടോ?
+                  ഖബറിസ്ഥാൻ ഉണ്ടോ? <span className="text-red-500">*</span>
                 </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center">
@@ -790,7 +1173,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  പള്ളിയിൽ എത്ര പേർക്ക് നമസ്‌കരിക്കാം?
+                  പള്ളിയിൽ എത്ര പേർക്ക് നമസ്‌കരിക്കാം? <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -807,7 +1190,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  വിസ്തീര്‍ണം
+                  വിസ്തീര്‍ണം <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -880,7 +1263,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  11. പള്ളിയുടെ സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ
+                  11. പള്ളിയുടെ സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.financialAssets}
@@ -896,7 +1279,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  12. വരുമാന മാർഗ്ഗങ്ങൾ
+                  12. വരുമാന മാർഗ്ഗങ്ങൾ <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.incomeSource}
@@ -912,7 +1295,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  13. പ്രതിമാസ ചെലവ് (രൂപ)
+                  13. പ്രതിമാസ ചെലവ് (രൂപ) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -1022,7 +1405,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  വരവ് (രൂപ)
+                  വരവ് (രൂപ) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -1038,7 +1421,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  ചെലവ് (രൂപ)
+                  ചെലവ് (രൂപ) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -1110,7 +1493,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  31. മാനേജിംഗ് കമ്മിറ്റിയുടെ പേര്
+                  31. മാനേജിംഗ് കമ്മിറ്റിയുടെ പേര് <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.committeeType}
@@ -1163,7 +1546,7 @@ const AffiliationForm = () => {
                   <div className="space-y-3">
                     <input
                       type="text"
-                      placeholder="പേര്"
+                      placeholder="പേര് *"
                       value={formData.president.name}
                       onChange={(e) =>
                         handleNestedInputChange(
@@ -1221,7 +1604,7 @@ const AffiliationForm = () => {
                   <div className="space-y-3">
                     <input
                       type="text"
-                      placeholder="പേര്"
+                      placeholder="പേര് *"
                       value={formData.secretary.name}
                       onChange={(e) =>
                         handleNestedInputChange(
@@ -1301,19 +1684,19 @@ const AffiliationForm = () => {
                       className="border border-gray-300 p-2 text-left"
                       style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                     >
-                      വയസ്സ്
+                      വയസ്സ് <span className="text-red-500">*</span>
                     </th>
                     <th
                       className="border border-gray-300 p-2 text-left"
                       style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                     >
-                      സാലറി
+                      സാലറി <span className="text-red-500">*</span>
                     </th>
                     <th
                       className="border border-gray-300 p-2 text-left"
                       style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                     >
-                      യോഗ്യത
+                      യോഗ്യത <span className="text-red-500">*</span>
                     </th>
                     <th
                       className="border border-gray-300 p-2 text-left"
@@ -1428,7 +1811,7 @@ const AffiliationForm = () => {
                   className="block text-sm font-medium mb-2"
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
-                  അന്യ സംസ്ഥാന ജീവനക്കാർ ഉണ്ടോ?
+                  അന്യ സംസ്ഥാന ജീവനക്കാർ ഉണ്ടോ? <span className="text-red-500">*</span>
                 </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center">
@@ -1476,7 +1859,7 @@ const AffiliationForm = () => {
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
                   അന്യ സംസ്ഥാന ജീവനക്കാരെ നിയമിക്കുമ്പോൾ ആവശ്യമായ നടപടിക്രമങ്ങൾ
-                  പാലിക്കാറുണ്ടോ/രേഖകൾ സൂക്ഷിക്കാറുണ്ടോ?
+                  പാലിക്കാറുണ്ടോ/രേഖകൾ സൂക്ഷിക്കാറുണ്ടോ? <span className="text-red-500">*</span>
                 </label>
                 <div className="flex space-x-4">
                   <label className="flex items-center">
@@ -1555,6 +1938,80 @@ const AffiliationForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Custom Modal */}
+      {showModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            {/* Modal Header */}
+            <div className="px-6 py-4 rounded-t-lg bg-white border-b border-gray-200">
+              <div className="flex items-center">
+                {/* Logo on the left */}
+                <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto mr-4" />
+                
+                {/* Title and icon on the right */}
+                <div className="flex items-center">
+                  {modalType === 'success' ? (
+                    <svg className="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                  <h3 className={`text-lg font-semibold ${
+                    modalType === 'success' ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                    {modalType === 'success' ? 'വിജയം!' : 'പിശക്!'}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                {modalMessage}
+              </p>
+              
+              {modalType === 'success' && trackingId && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
+                  <p className="text-sm text-green-800 font-medium">
+                    ട്രാക്കിംഗ് ഐഡി:
+                  </p>
+                  <p className="text-lg font-bold text-green-900" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                    {trackingId}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  onClick={closeModal}
+                  className={`px-4 py-2 rounded-md text-white font-medium ${
+                    modalType === 'success' 
+                      ? 'bg-green-500 hover:bg-green-600' 
+                      : 'bg-red-500 hover:bg-red-600'
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    modalType === 'success' ? 'focus:ring-green-400' : 'focus:ring-red-400'
+                  }`}
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  {modalType === 'success' ? 'ശരി' : 'ശരി'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
