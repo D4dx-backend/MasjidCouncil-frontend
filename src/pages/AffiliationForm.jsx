@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, X } from "lucide-react";
 import logo from "../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AffiliationForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     // Basic Information
     mosqueName: "",
@@ -91,6 +93,12 @@ const AffiliationForm = () => {
   const [modalType, setModalType] = useState(''); // 'success' or 'error'
   const [modalMessage, setModalMessage] = useState('');
   const [trackingId, setTrackingId] = useState('');
+  
+  // Cancel modal states
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  
+  // Submit confirmation modal states
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   const facilities = [
     "മദ്രസ",
@@ -401,6 +409,230 @@ const AffiliationForm = () => {
     setModalType('');
   };
 
+  // Cancel modal functions
+  const showCancelConfirmation = () => {
+    setShowCancelModal(true);
+  };
+
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+  };
+
+  const handleCancelForm = () => {
+    setShowCancelModal(false);
+    navigate('/');
+  };
+
+  // Submit confirmation modal functions
+  const showSubmitConfirmation = () => {
+    setShowSubmitModal(true);
+  };
+
+  const closeSubmitModal = () => {
+    setShowSubmitModal(false);
+  };
+
+  const handleConfirmSubmit = () => {
+    setShowSubmitModal(false);
+    handleSubmit();
+  };
+
+  // New function to validate all fields before showing confirmation
+  const validateAllFields = () => {
+    const errors = {};
+    let hasErrors = false;
+
+    // Validate all required fields
+    if (!formData.mosqueName || formData.mosqueName.trim() === "") {
+      errors.mosqueName = true;
+      hasErrors = true;
+    }
+
+    if (!formData.mosqueAddress || formData.mosqueAddress.trim() === "") {
+      errors.mosqueAddress = true;
+      hasErrors = true;
+    }
+
+    if (!formData.localityAddress || formData.localityAddress.trim() === "") {
+      errors.localityAddress = true;
+      hasErrors = true;
+    }
+
+    if (!formData.yearStarted || formData.yearStarted.trim() === "") {
+      errors.yearStarted = true;
+      hasErrors = true;
+    }
+
+    if (!formData.completeAddress || formData.completeAddress.trim() === "") {
+      errors.completeAddress = true;
+      hasErrors = true;
+    }
+
+    if (!formData.district || formData.district.trim() === "") {
+      errors.district = true;
+      hasErrors = true;
+    }
+
+    if (!formData.pincode || formData.pincode.trim() === "") {
+      errors.pincode = true;
+      hasErrors = true;
+    }
+
+    if (!formData.phone || formData.phone.trim() === "") {
+      errors.phone = true;
+      hasErrors = true;
+    }
+
+    if (!formData.jamaatDistrict || formData.jamaatDistrict.trim() === "") {
+      errors.jamaatDistrict = true;
+      hasErrors = true;
+    }
+
+    if (!formData.area || formData.area.trim() === "") {
+      errors.area = true;
+      hasErrors = true;
+    }
+
+    if (!formData.hasCemetery || formData.hasCemetery.trim() === "") {
+      errors.hasCemetery = true;
+      hasErrors = true;
+    }
+
+    if (!formData.specialtyDescription || formData.specialtyDescription.trim() === "") {
+      errors.specialtyDescription = true;
+      hasErrors = true;
+    }
+
+    if (!formData.category || formData.category.trim() === "") {
+      errors.category = true;
+      hasErrors = true;
+    }
+
+    if (!formData.financialAssets || formData.financialAssets.trim() === "") {
+      errors.financialAssets = true;
+      hasErrors = true;
+    }
+
+    if (!formData.incomeSource || formData.incomeSource.trim() === "") {
+      errors.incomeSource = true;
+      hasErrors = true;
+    }
+
+    if (!formData.monthlyExpenses || formData.monthlyExpenses.trim() === "") {
+      errors.monthlyExpenses = true;
+      hasErrors = true;
+    }
+
+    if (!formData.totalIncome || formData.totalIncome.trim() === "") {
+      errors.totalIncome = true;
+      hasErrors = true;
+    }
+
+    if (!formData.totalExpense || formData.totalExpense.trim() === "") {
+      errors.totalExpense = true;
+      hasErrors = true;
+    }
+
+    if (!formData.committeeType || formData.committeeType.trim() === "") {
+      errors.committeeType = true;
+      hasErrors = true;
+    }
+
+    if (!formData.president.name || formData.president.name.trim() === "") {
+      errors.presidentName = true;
+      hasErrors = true;
+    }
+
+    if (!formData.secretary.name || formData.secretary.name.trim() === "") {
+      errors.secretaryName = true;
+      hasErrors = true;
+    }
+
+    if (!formData.hasOutstateStaff || formData.hasOutstateStaff.trim() === "") {
+      errors.hasOutstateStaff = true;
+      hasErrors = true;
+    }
+
+    if (!formData.followsOutstateProcedures || formData.followsOutstateProcedures.trim() === "") {
+      errors.followsOutstateProcedures = true;
+      hasErrors = true;
+    }
+
+    // Validate mobile numbers if provided
+    if (formData.phone && !validateMobileNumber(formData.phone)) {
+      errors.phone = true;
+      hasErrors = true;
+    }
+
+    if (formData.president.mobile && !validateMobileNumber(formData.president.mobile)) {
+      errors.presidentMobile = true;
+      hasErrors = true;
+    }
+
+    if (formData.secretary.mobile && !validateMobileNumber(formData.secretary.mobile)) {
+      errors.secretaryMobile = true;
+      hasErrors = true;
+    }
+
+    // Validate email if provided
+    if (formData.email && !validateEmail(formData.email)) {
+      errors.email = true;
+      hasErrors = true;
+    }
+
+    if (formData.president.email && !validateEmail(formData.president.email)) {
+      errors.presidentEmail = true;
+      hasErrors = true;
+    }
+
+    if (formData.secretary.email && !validateEmail(formData.secretary.email)) {
+      errors.secretaryEmail = true;
+      hasErrors = true;
+    }
+
+    // Validate pincode if provided
+    if (formData.pincode && !validatePincode(formData.pincode)) {
+      errors.pincode = true;
+      hasErrors = true;
+    }
+
+    // Validate staff details - all staff must have required fields
+    if (formData.staff && formData.staff.length > 0) {
+      for (let i = 0; i < formData.staff.length; i++) {
+        const staff = formData.staff[i];
+        if (!staff.age || staff.age.trim() === "") {
+          errors[`staffAge${i}`] = true;
+          hasErrors = true;
+        }
+        if (!staff.salary || staff.salary.trim() === "") {
+          errors[`staffSalary${i}`] = true;
+          hasErrors = true;
+        }
+        if (!staff.qualification || staff.qualification.trim() === "") {
+          errors[`staffQualification${i}`] = true;
+          hasErrors = true;
+        }
+      }
+    }
+
+    // Set validation errors
+    setValidationErrors(errors);
+
+    if (hasErrors) {
+      showErrorModal("ദയവായി എല്ലാ ആവശ്യമായ വിവരങ്ങളും പൂരിപ്പിക്കുക");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Updated function to handle submit button click
+  const handleSubmitClick = () => {
+    if (validateAllFields()) {
+      showSubmitConfirmation();
+    }
+  };
+
   const validateField = (fieldName, value) => {
     let isValid = true;
 
@@ -696,9 +928,22 @@ const AffiliationForm = () => {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
-        <div className="bg-white border-b p-6">
-          <div className="flex items-center gap-3">
-            <ChevronLeft className="w-6 h-6 text-gray-600" />
+        <div className="bg-white border-b p-6 relative">
+          {/* Cross button */}
+          <button
+            onClick={showCancelConfirmation}
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            title="ഫോം ഉപേക്ഷിക്കുക"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div className="flex items-center gap-4 pr-12">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <img src={logo} alt="Masjid Council Kerala" className="h-12 w-auto" />
+            </div>
+            
             <div>
               <h1
                 className="text-2xl font-bold text-gray-900"
@@ -734,7 +979,9 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("mosqueName", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.mosqueName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
               </div>
               <div>
@@ -749,7 +996,9 @@ const AffiliationForm = () => {
                   onChange={(e) =>
                     handleInputChange("mosqueAddress", e.target.value)
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.mosqueAddress ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 >
                   <option
                     value=""
@@ -881,7 +1130,9 @@ const AffiliationForm = () => {
                       handleInputChange("district", e.target.value)
                     }
                     disabled={loadingDistricts}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                    className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 ${
+                      validationErrors.district ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   >
                     <option value="">
                       {loadingDistricts ? "ലോഡിംഗ്..." : "ജില്ല തിരഞ്ഞെടുക്കുക"}
@@ -915,7 +1166,9 @@ const AffiliationForm = () => {
                         handleInputChange("pincode", value);
                       }
                     }}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      validationErrors.pincode ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
                 </div>
                 <div>
@@ -1555,7 +1808,9 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors.presidentName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
                     <input
                       type="tel"
@@ -1613,7 +1868,9 @@ const AffiliationForm = () => {
                           e.target.value
                         )
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        validationErrors.secretaryName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     />
                     <input
                       type="tel"
@@ -1917,8 +2174,8 @@ const AffiliationForm = () => {
             </button>
             <button
               style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
-              onClick={handleSubmit}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+              onClick={handleSubmitClick}
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center space-x-2"
             >
               <span>അപേക്ഷ സമർപ്പിക്കുക</span>
               <svg
@@ -2006,6 +2263,160 @@ const AffiliationForm = () => {
                   style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 >
                   {modalType === 'success' ? 'ശരി' : 'ശരി'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            {/* Modal Header */}
+            <div className="px-6 py-4 rounded-t-lg bg-white border-b border-gray-200">
+              <div className="flex items-center">
+                {/* Logo on the left */}
+                <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto mr-4" />
+                
+                {/* Title and icon on the right */}
+                <div className="flex items-center">
+                  <svg className="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-red-600">
+                    ഫോം ഉപേക്ഷിക്കുക
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                നിങ്ങൾ ഉപേക്ഷിക്കുന്നത് ഉറപ്പാണോ? നിങ്ങൾ നൽകിയ എല്ലാ വിവരങ്ങളും നഷ്ടമാകും.
+              </p>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeCancelModal}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  റദ്ദാക്കുക
+                </button>
+                <button
+                  onClick={handleCancelForm}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  ഉപേക്ഷിക്കുക
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="px-6 py-4 rounded-t-lg bg-white border-b border-gray-200">
+              <div className="flex items-center">
+                {/* Logo on the left */}
+                <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto mr-4" />
+                
+                {/* Title and icon on the right */}
+                <div className="flex items-center">
+                  <svg className="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-green-600">
+                    അപേക്ഷ സമർപ്പിക്കുക
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                ദയവായി നിങ്ങളുടെ വിവരങ്ങൾ പരിശോധിക്കുക:
+              </p>
+              
+              {/* Form Summary */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      പള്ളിയുടെ പേര്:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.mosqueName || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      ജില്ല:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.district || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      ഫോൺ നമ്പർ:
+                    </h4>
+                    <p className="text-gray-600">
+                      {formData.phone || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      പ്രസിഡന്റ്:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.president.name || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                ഈ വിവരങ്ങൾ ശരിയാണെങ്കിൽ "സമർപ്പിക്കുക" ക്ലിക്ക് ചെയ്യുക. തിരുത്താൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ "തിരുത്തുക" ക്ലിക്ക് ചെയ്യുക.
+              </p>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeSubmitModal}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  തിരുത്തുക
+                </button>
+                <button
+                  onClick={handleConfirmSubmit}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  സമർപ്പിക്കുക
                 </button>
               </div>
             </div>

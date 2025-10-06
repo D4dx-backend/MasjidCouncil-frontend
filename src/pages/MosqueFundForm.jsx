@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import logo from '../assets/logo.png';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const MosqueFundForm = () => {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     // Mosque Details
@@ -68,6 +71,10 @@ const MosqueFundForm = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
 
+  // Modal states for validation flow
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+
   // Custom alert functions
   const showCustomAlert = (message, type = 'success') => {
     setAlertMessage(message);
@@ -83,6 +90,138 @@ const MosqueFundForm = () => {
   const hideAlert = () => {
     setShowAlert(false);
     setAlertMessage('');
+  };
+
+  // Modal functions
+  const showCancelConfirmation = () => {
+    setShowCancelModal(true);
+  };
+
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+  };
+
+  const handleCancelForm = () => {
+    setShowCancelModal(false);
+    navigate('/');
+  };
+
+  const showSubmitConfirmation = () => {
+    setShowSubmitModal(true);
+  };
+
+  const closeSubmitModal = () => {
+    setShowSubmitModal(false);
+  };
+
+  const handleConfirmSubmit = () => {
+    setShowSubmitModal(false);
+    handleSubmit();
+  };
+
+  // New function to validate all fields before showing confirmation
+  const validateAllFields = () => {
+    const errors = {};
+    let hasErrors = false;
+
+    // Validate all required fields based on backend model
+    if (!formData.mosqueName || formData.mosqueName.trim() === "") {
+      errors.mosqueName = true;
+      hasErrors = true;
+    }
+
+    if (!formData.mckAffiliation || formData.mckAffiliation.trim() === "") {
+      errors.mckAffiliation = true;
+      hasErrors = true;
+    }
+
+    if (!formData.address || formData.address.trim() === "") {
+      errors.address = true;
+      hasErrors = true;
+    }
+
+    if (!formData.phone || formData.phone.trim() === "") {
+      errors.phone = true;
+      hasErrors = true;
+    }
+
+    if (!formData.district || formData.district.trim() === "") {
+      errors.district = true;
+      hasErrors = true;
+    }
+
+    if (!formData.mckFundService || formData.mckFundService.trim() === "") {
+      errors.mckFundService = true;
+      hasErrors = true;
+    }
+
+    if (!formData.previousHelp || formData.previousHelp.trim() === "") {
+      errors.previousHelp = true;
+      hasErrors = true;
+    }
+
+    if (!formData.helpPurpose || formData.helpPurpose.trim() === "") {
+      errors.helpPurpose = true;
+      hasErrors = true;
+    }
+
+    if (!formData.needDescription || formData.needDescription.trim() === "") {
+      errors.needDescription = true;
+      hasErrors = true;
+    }
+
+    if (!formData.expectedExpense || formData.expectedExpense.trim() === "") {
+      errors.expectedExpense = true;
+      hasErrors = true;
+    }
+
+    if (!formData.mosqueOfficialName || formData.mosqueOfficialName.trim() === "") {
+      errors.mosqueOfficialName = true;
+      hasErrors = true;
+    }
+
+    if (!formData.mosqueOfficialPhone || formData.mosqueOfficialPhone.trim() === "") {
+      errors.mosqueOfficialPhone = true;
+      hasErrors = true;
+    }
+
+    if (!formData.whatsappNumber || formData.whatsappNumber.trim() === "") {
+      errors.whatsappNumber = true;
+      hasErrors = true;
+    }
+
+    // Validate mobile numbers if provided
+    if (formData.phone && !validateMobileNumber(formData.phone)) {
+      errors.phone = true;
+      hasErrors = true;
+    }
+
+    if (formData.mosqueOfficialPhone && !validateMobileNumber(formData.mosqueOfficialPhone)) {
+      errors.mosqueOfficialPhone = true;
+      hasErrors = true;
+    }
+
+    if (formData.whatsappNumber && !validateMobileNumber(formData.whatsappNumber)) {
+      errors.whatsappNumber = true;
+      hasErrors = true;
+    }
+
+    // Set validation errors
+    setValidationErrors(errors);
+
+    if (hasErrors) {
+      showCustomAlert("ദയവായി എല്ലാ ആവശ്യമായ വിവരങ്ങളും പൂരിപ്പിക്കുക", 'error');
+      return false;
+    }
+
+    return true;
+  };
+
+  // Updated function to handle submit button click
+  const handleSubmitClick = () => {
+    if (validateAllFields()) {
+      showSubmitConfirmation();
+    }
   };
 
   const validateField = (fieldName, value) => {
@@ -385,7 +524,7 @@ const MosqueFundForm = () => {
     const requiredFields = [
       'mosqueName', 'mckAffiliation', 'address', 'phone', 'district',
       'mckFundService', 'previousHelp', 'helpPurpose', 'needDescription',
-      'expectedExpense', 'mosqueOfficialName', 'mosqueOfficialPhone'
+      'expectedExpense', 'mosqueOfficialName', 'mosqueOfficialPhone', 'whatsappNumber'
     ];
 
     const missingFields = requiredFields.filter(field => !formData[field]);
@@ -458,9 +597,18 @@ const MosqueFundForm = () => {
 
   if (!showForm) {
     return (
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ</h1>
-        <p className="text-lg text-gray-700 mb-6"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
+      <div className="max-w-6xl mx-auto p-4 bg-white rounded-lg shadow mt-2">
+        <div className="flex items-center gap-4 mb-4">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img src={logo} alt="Masjid Council Kerala" className="h-12 w-auto" />
+          </div>
+          
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ</h1>
+            <p className="text-lg text-gray-700" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
+          </div>
+        </div>
 
         {/* Info Card */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
@@ -470,8 +618,8 @@ const MosqueFundForm = () => {
         </div>
 
         {/* Guidelines */}
-        <div className="bg-gray-50 p-6 rounded-lg mb-6">
-          <ul className="list-disc space-y-3 text-gray-800 text-sm ml-6"style={{ fontFamily: "Anek Malayalam Variable" }}>
+        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <ul className="list-disc space-y-2 text-gray-800 text-sm ml-6" style={{ fontFamily: "Anek Malayalam Variable" }}>
             <li>MCK യിൽ അഫിലിയേറ്റ് ചെയ്‌ത മസ്‌ജിദുകൾക്ക് വേണ്ടിയുള്ള സംവിധാനമാണിത്. അഫിലിയേറ്റ് ചെയ്യാത്ത പള്ളികളുടെ അപേക്ഷ പരിഗണിക്കുകയില്ല.</li>
             <li>എല്ലാ മാസവും ആദ്യത്തെ വെള്ളിയാഴ്‌ച ജുമുഅക്ക് ശേഷം മസ്‌ജിദ് ഫണ്ട് സമാഹരിക്കുകയും കേന്ദ്രത്തിലടക്കുകയും ചെയ്യുന്ന പള്ളികൾക്കാണ് സഹായത്തിന് അർഹതയുള്ളത്.</li>
             <li>പള്ളികളുമായി ബന്ധപ്പെട്ട അറ്റകുറ്റപ്പണികൾക്ക് വേണ്ടിയാണ് അപേക്ഷ സമർപ്പിക്കേണ്ടത്. പുതിയ പള്ളി നിർമ്മാണത്തിനോ പള്ളിയുമായി ചേർന്ന് നിൽകുന്ന മറ്റു സംവിധാനങ്ങൾക്കോ (മദ്രസ, ലൈബ്രറി) സഹായം ലഭ്യമല്ല.</li>
@@ -484,11 +632,11 @@ const MosqueFundForm = () => {
           </ul>
         </div>
 
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 text-sm text-gray-900">
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4 text-sm text-gray-900">
           <strong style={{ fontFamily: "Anek Malayalam Variable" }}>NB:</strong> അപേക്ഷയോടൊപ്പമുള്ള മാർഗനിർദ്ദേശങ്ങളിൽ സൂചിപ്പിച്ച രേഖകൾ അപേക്ഷയോടൊപ്പം സമർപ്പിക്കേണ്ടതാണ്.
         </div>
 
-        <div className="text-right">
+        <div className="text-right mt-4">
           <button 
           style={{ fontFamily: "Anek Malayalam Variable" }}
             onClick={() => setShowForm(true)}
@@ -503,19 +651,29 @@ const MosqueFundForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
-      <div className="mt-10">
-        <div className="flex items-center mb-4">
+      <div className="mt-2">
+        <div className="bg-white border-b p-6 relative">
+          {/* Cross button */}
           <button
-            onClick={() => setShowForm(false)}
-            className="text-blue-600 hover:text-blue-800 mr-4"
+            onClick={showCancelConfirmation}
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            title="ഫോം ഉപേക്ഷിക്കുക"
           >
-            ← പിന്നോട്ട്
+            <X className="w-6 h-6" />
           </button>
+          
+          <div className="flex items-center gap-4 pr-12">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <img src={logo} alt="Masjid Council Kerala" className="h-12 w-auto" />
+            </div>
+            
           <div>
-            <h1 className="text-2xl font-bold text-gray-800"style={{ fontFamily: "Anek Malayalam Variable" }}>
+              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "Anek Malayalam Variable" }}>
               മസ്ജിദ് ഫണ്ട് സഹായത്തിനുള്ള അപേക്ഷ
             </h1>
-            <p className="text-gray-600"style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
+              <p className="text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>മസ്ജിദ് കൗൺസിൽ കേരള</p>
+            </div>
           </div>
         </div>
       </div>
@@ -527,7 +685,7 @@ const MosqueFundForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                മസ്ജിദിന്റെ പേര്
+                മസ്ജിദിന്റെ പേര് <span className="text-red-500">*</span>
               </label>
               <input
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -535,20 +693,24 @@ const MosqueFundForm = () => {
                 name="mosqueName"
                 value={formData.mosqueName}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mosqueName ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                എം സി കെ അഫിലിയേഷൻ നമ്പർ
+                എം സി കെ അഫിലിയേഷൻ നമ്പർ <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="mckAffiliation"
                 value={formData.mckAffiliation}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mckAffiliation ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
@@ -556,14 +718,16 @@ const MosqueFundForm = () => {
           
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              വിലാസം
+              വിലാസം <span className="text-red-500">*</span>
             </label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleInputChange}
               rows="3"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                validationErrors.address ? 'border-red-500' : 'border-gray-300'
+              }`}
               required
             />
           </div>
@@ -595,7 +759,7 @@ const MosqueFundForm = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ഫോൺ
+                ഫോൺ <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -610,13 +774,15 @@ const MosqueFundForm = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ജില്ല
+                ജില്ല <span className="text-red-500">*</span>
               </label>
               <select
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.district ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
                 disabled={loadingDropdowns}
                 style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -682,14 +848,16 @@ const MosqueFundForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് മാസാന്ത ഫണ്ട് ശേഖരണം നടക്കാറുണ്ടോ
+              മസ്‌ജിദ് കൗൺസിൽ കേരളക്ക് മാസാന്ത ഫണ്ട് ശേഖരണം നടക്കാറുണ്ടോ <span className="text-red-500">*</span>
               </label>
               <select
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="mckFundService"
                 value={formData.mckFundService}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mckFundService ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               >
                 <option value="">തിരഞ്ഞെടുക്കുക</option>
@@ -699,14 +867,16 @@ const MosqueFundForm = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              മസ്‌ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ
+              മസ്‌ജിദ് കൗൺസിലിൽ നിന്ന് മുമ്പ് സഹായം ലഭ്യമായിട്ടുണ്ടോ <span className="text-red-500">*</span>
               </label>
               <select
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
                 name="previousHelp"
                 value={formData.previousHelp}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.previousHelp ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               >
                 <option value="">തിരഞ്ഞെടുക്കുക</option>
@@ -723,28 +893,32 @@ const MosqueFundForm = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-              ഇപ്പോൾ സഹായം ആവശ്യമായ ഇനം
+              ഇപ്പോൾ സഹായം ആവശ്യമായ ഇനം <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="helpPurpose"
                 value={formData.helpPurpose}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.helpPurpose ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ആവശ്യത്തിന്റെ വിശദവിവരം
+                ആവശ്യത്തിന്റെ വിശദവിവരം <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="needDescription"
                 value={formData.needDescription}
                 onChange={handleInputChange}
                 rows="4"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.needDescription ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
@@ -752,7 +926,7 @@ const MosqueFundForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                  പ്രതീക്ഷിക്കുന്ന ചെലവ് (രൂപ)
+                  പ്രതീക്ഷിക്കുന്ന ചെലവ് (രൂപ) <span className="text-red-500">*</span>
                 </label>
                 <input
                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -760,7 +934,9 @@ const MosqueFundForm = () => {
                   name="expectedExpense"
                   value={formData.expectedExpense}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    validationErrors.expectedExpense ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   required
                 />
               </div>
@@ -787,7 +963,7 @@ const MosqueFundForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി
+                മസ്ജിദ് പ്രസിഡന്റ്/സെക്രട്ടറി <span className="text-red-500">*</span>
               </label>
               <input
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -795,13 +971,15 @@ const MosqueFundForm = () => {
                 name="mosqueOfficialName"
                 value={formData.mosqueOfficialName}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  validationErrors.mosqueOfficialName ? 'border-red-500' : 'border-gray-300'
+                }`}
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                ഫോൺ
+                ഫോൺ <span className="text-red-500">*</span>
               </label>
               <input
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -817,7 +995,7 @@ const MosqueFundForm = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
-                വാട്സാപ്പ് നമ്പർ
+                വാട്സാപ്പ് നമ്പർ <span className="text-red-500">*</span>
               </label>
               <input
                style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
@@ -828,6 +1006,7 @@ const MosqueFundForm = () => {
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   validationErrors.whatsappNumber ? 'border-red-500' : 'border-gray-300'
                 }`}
+                required
               />
             </div>
           </div>
@@ -1007,12 +1186,12 @@ const MosqueFundForm = () => {
           <button
            style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
             type="button"
-            onClick={handleSubmit}
+            onClick={handleSubmitClick}
             disabled={isSubmitting}
             className={`px-8 py-3 text-white font-semibold rounded-lg transition duration-200 ${
               isSubmitting 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-green-600 hover:bg-green-700'
             }`}
           >
             {isSubmitting ? (
@@ -1090,6 +1269,160 @@ const MosqueFundForm = () => {
               >
                 ശരി
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            {/* Modal Header */}
+            <div className="px-6 py-4 rounded-t-lg bg-white border-b border-gray-200">
+              <div className="flex items-center">
+                {/* Logo on the left */}
+                <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto mr-4" />
+                
+                {/* Title and icon on the right */}
+                <div className="flex items-center">
+                  <svg className="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-red-600">
+                    ഫോം ഉപേക്ഷിക്കുക
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                നിങ്ങൾ ഉപേക്ഷിക്കുന്നത് ഉറപ്പാണോ? നിങ്ങൾ നൽകിയ എല്ലാ വിവരങ്ങളും നഷ്ടമാകും.
+              </p>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeCancelModal}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  റദ്ദാക്കുക
+                </button>
+                <button
+                  onClick={handleCancelForm}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  ഉപേക്ഷിക്കുക
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="px-6 py-4 rounded-t-lg bg-white border-b border-gray-200">
+              <div className="flex items-center">
+                {/* Logo on the left */}
+                <img src={logo} alt="Masjid Council Kerala" className="h-10 w-auto mr-4" />
+                
+                {/* Title and icon on the right */}
+                <div className="flex items-center">
+                  <svg className="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-green-600">
+                    അപേക്ഷ സമർപ്പിക്കുക
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                ദയവായി നിങ്ങളുടെ വിവരങ്ങൾ പരിശോധിക്കുക:
+              </p>
+              
+              {/* Form Summary */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      മസ്ജിദിന്റെ പേര്:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.mosqueName || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      എം സി കെ അഫിലിയേഷൻ:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.mckAffiliation || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      സഹായ ആവശ്യം:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      {formData.helpPurpose || 'നൽകിയിട്ടില്ല'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      പ്രതീക്ഷിക്കുന്ന ചെലവ്:
+                    </h4>
+                    <p className="text-gray-600" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                      ₹{formData.expectedExpense || '0'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}>
+                ഈ വിവരങ്ങൾ ശരിയാണെങ്കിൽ "സമർപ്പിക്കുക" ക്ലിക്ക് ചെയ്യുക. തിരുത്താൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ "തിരുത്തുക" ക്ലിക്ക് ചെയ്യുക.
+              </p>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeSubmitModal}
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  തിരുത്തുക
+                </button>
+                <button
+                  onClick={handleConfirmSubmit}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                  style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+                >
+                  സമർപ്പിക്കുക
+                </button>
+              </div>
             </div>
           </div>
         </div>
