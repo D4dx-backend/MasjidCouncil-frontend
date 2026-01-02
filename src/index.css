@@ -1,1 +1,89 @@
 @import "tailwindcss";
+
+/* ----------------------------
+   Screen vs Print visibility
+----------------------------- */
+.screen-only {
+  display: block;
+}
+
+.print-only {
+  display: none;
+}
+
+/* ----------------------------
+   Print fonts (bundled by Vite)
+----------------------------- */
+@font-face {
+  font-family: "Noto Sans Malayalam";
+  src: url("./fonts/NotoSansMalayalam-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Serif Malayalam";
+  src: url("./fonts/NotoSerifMalayalam-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ----------------------------
+   Print stylesheet (A4)
+----------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide interactive UI */
+  .screen-only,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show print document */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Prevent Tailwind shadows/colors bleeding into print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Page break helpers */
+  .print-page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* RTL helper */
+  .rtl {
+    direction: rtl;
+    text-align: center;
+  }
+}

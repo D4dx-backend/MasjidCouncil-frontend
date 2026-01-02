@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Menu, X, LogOut, Home, FileText, Heart, Building2, User } from 'lucide-react';
-import logo from '../assets/logo.png';
+import { Plus, X, LogOut, Home, FileText, Heart, Building2, User } from 'lucide-react';
+import logoFull from '../assets/logo.png';
+import logoOnly from '../assets/logoOnly.png';
 
 const SuperAdminSidebar = ({ onAddAdmin }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -30,25 +31,31 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
   return (
     <>
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 hidden lg:flex flex-col`}>
         {/* Logo and Toggle */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             {sidebarOpen && (
-              <div className="flex items-center space-x-3">
-                <img src={logo} alt="MCK Logo" className="h-10 w-auto" />
-                <span className="font-bold text-gray-900 text-sm">Super Admin</span>
-              </div>
+              <>
+                <div className="flex items-center space-x-3">
+                  <img src={logoFull} alt="MCK Logo" className="h-10 w-auto" />
+                </div>
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
             )}
             {!sidebarOpen && (
-              <img src={logo} alt="MCK Logo" className="h-10 w-auto mx-auto" />
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="mx-auto hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                <img src={logoOnly} alt="MCK Logo" className="h-10 w-auto" />
+              </button>
             )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${!sidebarOpen ? 'mx-auto mt-2' : ''}`}
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
         </div>
 
@@ -105,7 +112,7 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
           {onAddAdmin && (
             <button
               onClick={onAddAdmin}
-              className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors w-full mt-4"
+              className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-gradient-to-r from-[#6db14e] to-[#5fa644] text-white hover:from-[#5fa644] hover:to-[#6db14e] transition-colors w-full mt-4"
             >
               <Plus className="w-5 h-5" />
               {sidebarOpen && <span>Add Admin</span>}
@@ -151,26 +158,26 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <LogOut className="w-6 h-6 text-red-600" />
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-gray-100">
+            <div className="flex flex-col items-center mb-6">
+              <img src={logoFull} alt="MCK Logo" className="h-16 w-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
+                Confirm Logout
+              </h3>
+              <p className="text-gray-600 text-center text-sm">
+                Are you sure you want to logout? You will need to login again to access the super admin panel.
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to logout?
-            </p>
             <div className="flex gap-3">
               <button
                 onClick={cancelLogout}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-gray-700"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md hover:shadow-lg"
               >
                 Logout
               </button>
@@ -180,7 +187,7 @@ const SuperAdminSidebar = ({ onAddAdmin }) => {
       )}
 
       {/* Spacer to push content */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'}`}></div>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} hidden lg:block`}></div>
     </>
   );
 };

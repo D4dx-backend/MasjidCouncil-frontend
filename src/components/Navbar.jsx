@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LogIn } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // for navigation
+import { useNavigate, useLocation } from 'react-router-dom'; // for navigation
 import logo from '../assets/logo.png';
 
 // Import Cinzel font
@@ -11,6 +11,7 @@ const cinzelFont = {
 
 const Navbar = () => {
   const navigate = useNavigate(); // initialize navigation
+  const location = useLocation(); // get current location
   const [isVisible, setIsVisible] = useState(false);
 
   const handleLoginClick = () => {
@@ -81,7 +82,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentPath = window.location.pathname;
+      const currentPath = location.pathname;
       
       // Always show navbar on About page
       if (currentPath === '/about') {
@@ -99,13 +100,15 @@ const Navbar = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
+  const isHomePage = location.pathname === '/';
+  
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}
+      } ${isHomePage ? 'hidden md:block' : ''}`}
     >
       {/* Top green gradient bar */}
       <div className="h-1 w-full bg-gradient-to-r from-[#239a5a] via-[#6db14e] to-green-700" />

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
-import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import StatusChangeModal from '../components/StatusChangeModal';
+import logoPng from '../assets/logo.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,6 +21,7 @@ const SuperAdminAffiliationDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
 
   useEffect(() => {
     // Get affiliation data from navigation state or fetch by ID
@@ -71,6 +72,48 @@ const SuperAdminAffiliationDetails = () => {
   const closeAlert = () => {
     setShowAlertModal(false);
     setAlertMessage('');
+  };
+
+  const handlePrint = async () => {
+    if (!affiliation) {
+      showAlert('No affiliation data available to print', 'error');
+      return;
+    }
+
+    const originalTitle = document.title;
+    const baseName = `Affiliation-${affiliation.affiliationNumber || affiliation._id || 'Application'}`;
+
+    let fallbackTimer;
+
+    const cleanup = () => {
+      window.removeEventListener('afterprint', afterPrintHandler);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      document.title = originalTitle;
+      setPrintLoading(false);
+    };
+
+    const afterPrintHandler = () => {
+      cleanup();
+    };
+
+    window.addEventListener('afterprint', afterPrintHandler);
+    fallbackTimer = setTimeout(afterPrintHandler, 15000);
+
+    setPrintLoading(true);
+    document.title = baseName;
+
+    try {
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.print();
+    } catch (err) {
+      console.error('Print error:', err);
+      showAlert('Failed to open print dialog. Please try again.', 'error');
+      cleanup();
+    }
   };
 
   // Status Change Functions
@@ -269,14 +312,104 @@ const SuperAdminAffiliationDetails = () => {
     );
   }
 
+  const safeText = (value, fallback = 'വിവരം ഇല്ല') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  const safeNumberText = (value, fallback = '0') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  // Arabic/Hebrew ranges (RTL scripts)
+  const isRtlText = (value) => /[\u0590-\u05FF\u0600-\u06FF\u0750-\u08FF]/.test(String(value || ''));
+
+  const rtlValueStyle = (value) => (
+    isRtlText(value)
+      ? { direction: 'rtl', textAlign: 'center', fontFamily: 'Arial, "Noto Sans Malayalam", "Anek Malayalam Variable", sans-serif' }
+      : {}
+  );
+
+  const formatList = (arr) => (Array.isArray(arr) ? arr.filter(Boolean).map((x) => String(x).trim()).filter(Boolean) : []);
+
+  const addr = affiliation.address?.[0] || {};
+  const jamath = affiliation.jamathArea?.[0] || {};
+  const finance = affiliation.finance?.[0] || {};
+  const audit = affiliation.audit?.[0] || {};
+  const accounts = affiliation.accounts?.[0] || {};
+  const committee = affiliation.committees?.[0] || {};
+  const president = committee.president?.[0] || {};
+  const secretary = committee.secretary?.[0] || {};
+  const workers = Array.isArray(committee.workers) ? committee.workers : [];
+
+  const statusMl =
+    affiliation.status === 'approved'
+      ? 'അനുമതി'
+      : affiliation.status === 'rejected'
+      ? 'നിരസിച്ചു'
+      : 'പരിഗണനയിൽ';
+
+  const submittedDate = affiliation.createdAt
+    ? new Date(affiliation.createdAt).toLocaleDateString('ml-IN')
+    : 'N/A';
+
+  const balance = (parseInt(accounts.lastYearIncome || 0, 10) - parseInt(accounts.lastYearExpense || 0, 10));
+
+  const printStyles = {
+    page: {
+      background: '#fff',
+      color: '#000',
+      fontFamily: '"Noto Sans Malayalam", "Anek Malayalam Variable", Arial, sans-serif',
+      fontSize: '11pt',
+      lineHeight: '1.35',
+    },
+    headerWrap: { marginBottom: '10pt' },
+    headerRow: { display: 'flex', alignItems: 'center', gap: '10pt', marginBottom: '8pt' },
+    logo: { width: '52pt', height: '52pt', objectFit: 'contain' },
+    titleMl: { fontSize: '14pt', fontWeight: 700, margin: 0 },
+    subtitleEn: { fontSize: '11pt', fontWeight: 400, margin: 0 },
+    metaRow: { display: 'flex', justifyContent: 'space-between', gap: '12pt', fontSize: '10.5pt' },
+    metaItem: { flex: 1 },
+    metaLabel: { fontWeight: 700 },
+    divider: { borderTop: '1pt solid #000', margin: '8pt 0 0 0' },
+    section: { marginTop: '12pt' },
+    sectionTitle: { fontSize: '12pt', fontWeight: 700, margin: '0 0 6pt 0' },
+    table: { width: '100%', borderCollapse: 'collapse' },
+    th: {
+      width: '34%',
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 700,
+    },
+    td: {
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 400,
+      wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
+    },
+    list: { margin: '0', paddingLeft: '16pt' },
+    listItem: { margin: '0 0 2pt 0' },
+    footer: { marginTop: '14pt', fontSize: '9pt', textAlign: 'center' },
+  };
+
   return (
+    <>
+    <div className="screen-only">
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <SuperAdminNavbar />
       <div className="p-4">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <button 
                 onClick={handleBack}
               className="p-2 hover:bg-green-700 rounded-full transition-colors"
@@ -288,6 +421,25 @@ const SuperAdminAffiliationDetails = () => {
               <p className="text-green-100 text-sm">Mosque Affiliation Application Details</p>
               <p className="text-green-200 text-xs">Affiliation Number: {affiliation.affiliationNumber}</p>
             </div>
+            </div>
+
+            <button
+              onClick={handlePrint}
+              disabled={printLoading}
+              className="flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-semibold px-4 py-2 rounded-md shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {printLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Preparing...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Print / Save PDF</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -811,6 +963,344 @@ const SuperAdminAffiliationDetails = () => {
         formType="Affiliation"
       />
     </div>
+    </div>
+
+    {/* Print-only document (browser-native PDF generation via window.print()) */}
+    <div className="print-only">
+      <div style={printStyles.page}>
+        <div style={printStyles.headerWrap} className="print-avoid-break">
+          <div style={printStyles.headerRow}>
+            <img src={logoPng} alt="Masjid Council Kerala" style={printStyles.logo} />
+            <div>
+              <p style={printStyles.titleMl}>മസ്ജിദ് അഫിലിയേഷൻ അപേക്ഷ</p>
+              <p style={printStyles.subtitleEn}>Mosque Affiliation Application Details</p>
+            </div>
+          </div>
+
+          <div style={printStyles.metaRow}>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Affiliation Number: </span>
+              <span>{safeText(affiliation.affiliationNumber, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Status: </span>
+              <span>{safeText(statusMl, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Submitted: </span>
+              <span>{safeText(submittedDate, 'N/A')}</span>
+            </div>
+          </div>
+
+          <div style={printStyles.divider} />
+        </div>
+
+        {/* Basic Information */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>അടിസ്ഥാന വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പള്ളിയുടെ പേര്</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(affiliation.name) }}>{safeText(affiliation.name)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>പള്ളിയുടെ സ്വഭാവം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(affiliation.mosqueType) }}>{safeText(affiliation.mosqueType)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>മഹല്ലിന്‍റെ സ്വഭാവം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(affiliation.mahallaType) }}>{safeText(affiliation.mahallaType)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>പ്രവർത്തനമാരംഭിച്ച വർഷം</th>
+                <td style={printStyles.td}>{safeText(affiliation.establishedYear)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Address Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>വിലാസ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പൂർണ വിലാസം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(addr.address) }}>{safeText(addr.address)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജില്ല</th>
+                <td style={printStyles.td}>{safeText(addr.district)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>പിൻകോഡ്</th>
+                <td style={printStyles.td}>{safeText(addr.pincode)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ഫോൺ</th>
+                <td style={printStyles.td}>{safeText(addr.phone)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ഇ മെയിൽ</th>
+                <td style={printStyles.td}>{safeText(addr.email)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വെബ്സൈറ്റ്</th>
+                <td style={printStyles.td}>{safeText(addr.website)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Jamaat-e-Islami Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ജമാഅത്തെ ഇസ്‌ലാമി ഘടകം</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>ഏരിയ</th>
+                <td style={printStyles.td}>{safeText(jamath.area)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജില്ല</th>
+                <td style={printStyles.td}>{safeText(jamath.district)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Facilities */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>പള്ളിയോടനുബന്ധിച്ച ഇതര സംവിധാനങ്ങൾ</p>
+          {formatList(affiliation.facilities).length ? (
+            <ul style={printStyles.list}>
+              {formatList(affiliation.facilities).map((f, idx) => (
+                <li key={idx} style={printStyles.listItem}>{f}</li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ fontSize: '11pt' }}>സംവിധാനങ്ങൾ തിരഞ്ഞെടുത്തിട്ടില്ല</div>
+          )}
+        </div>
+
+        {/* Cemetery */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ഖബറിസ്ഥാൻ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>ഖബറിസ്ഥാൻ ഉണ്ടോ?</th>
+                <td style={printStyles.td}>{affiliation.hasCemetery ? 'ഉണ്ട്' : 'ഇല്ല'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Capacity */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>പള്ളിയുടെ ശേഷി</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>നമസ്‌കാര ശേഷി (പേർ)</th>
+                <td style={printStyles.td}>{safeText(affiliation.mosqueCapacity)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വിസ്തീര്‍ണം</th>
+                <td style={printStyles.td}>{safeText(affiliation.mosqueArea)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Juma */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ജുമുഅ പങ്കാളികൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പുരുഷന്മാർ</th>
+                <td style={printStyles.td}>{safeNumberText(affiliation.fridayMaleAttendance)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>സ്ത്രീകൾ</th>
+                <td style={printStyles.td}>{safeNumberText(affiliation.fridayFemaleAttendance)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Finance */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>സാമ്പത്തിക വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>സ്ഥാവര-ജംഗമ സ്വത്തുക്കൾ</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(finance.assets) }}>{safeText(finance.assets)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വരുമാന മാർഗ്ഗങ്ങൾ</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(finance.incomeSource) }}>{safeText(finance.incomeSource)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>പ്രതിമാസ ചെലവ് (രൂപ)</th>
+                <td style={printStyles.td}>₹{safeNumberText(finance.monthlyExpense)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Audit */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ഓഡിറ്റും രേഖകളും</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>ഓഡിറ്റ് ചെയ്യാറുണ്ടോ?</th>
+                <td style={printStyles.td}>{audit.hasAudit ? 'ഉണ്ട്' : 'ഇല്ല'}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>സൂക്ഷിക്കുന്ന രേഖകൾ</th>
+                <td style={printStyles.td}>
+                  {formatList(audit.recordsKept).length ? (
+                    <ul style={printStyles.list}>
+                      {formatList(audit.recordsKept).map((r, idx) => (
+                        <li key={idx} style={printStyles.listItem}>{r}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    'രേഖകൾ തിരഞ്ഞെടുത്തിട്ടില്ല'
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Accounts */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>കഴിഞ്ഞ വർഷത്തെ കണക്ക്</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>വരവ് (രൂപ)</th>
+                <td style={printStyles.td}>₹{safeNumberText(accounts.lastYearIncome)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ചെലവ് (രൂപ)</th>
+                <td style={printStyles.td}>₹{safeNumberText(accounts.lastYearExpense)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ബാലൻസ്</th>
+                <td style={printStyles.td}>₹{Number.isFinite(balance) ? balance.toLocaleString() : '0'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Community Services */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ജനസേവന സംരംഭങ്ങൾ</p>
+          {formatList(affiliation.commmunityServices).length ? (
+            <ul style={printStyles.list}>
+              {formatList(affiliation.commmunityServices).map((s, idx) => (
+                <li key={idx} style={printStyles.listItem}>{s}</li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ fontSize: '11pt' }}>സേവനങ്ങൾ തിരഞ്ഞെടുത്തിട്ടില്ല</div>
+          )}
+          {formatList(affiliation.otherCommunityServices).length ? (
+            <div style={{ marginTop: '6pt' }}>
+              <div style={{ fontWeight: 700, marginBottom: '4pt' }}>മറ്റുള്ളവ</div>
+              <ul style={printStyles.list}>
+                {formatList(affiliation.otherCommunityServices).map((s, idx) => (
+                  <li key={idx} style={printStyles.listItem}>{s}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Committee */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മാനേജിംഗ് കമ്മിറ്റി</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>കമ്മിറ്റിയുടെ പേര്</th>
+                <td style={printStyles.td}>{safeText(committee.committeeType)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>പ്രസിഡന്‍റ് / ചെയർമാൻ</th>
+                <td style={printStyles.td}>
+                  {safeText(president.name, '-')}{'\n'}
+                  മൊബൈൽ: {safeText(president.phone, '-')}{'\n'}
+                  ഇ മെയിൽ: {safeText(president.email, '-')}
+                </td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>സെക്രട്ടറി</th>
+                <td style={printStyles.td}>
+                  {safeText(secretary.name, '-')}{'\n'}
+                  മൊബൈൽ: {safeText(secretary.phone, '-')}{'\n'}
+                  ഇ മെയിൽ: {safeText(secretary.email, '-')}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Staff */}
+        <div style={printStyles.section}>
+          <p style={printStyles.sectionTitle}>ജീവനക്കാരുടെ വിവരങ്ങൾ</p>
+          {workers.length ? (
+            <table style={printStyles.table}>
+              <thead>
+                <tr>
+                  <th style={printStyles.th}>വയസ്സ്</th>
+                  <th style={printStyles.th}>യോഗ്യത</th>
+                  <th style={printStyles.th}>ശമ്പളം</th>
+                  <th style={printStyles.th}>പ്രവർത്തനം</th>
+                  <th style={printStyles.th}>റിമാർക്സ്</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workers.map((w, idx) => (
+                  <tr key={idx}>
+                    <td style={printStyles.td}>{safeText(w.age, '-')}</td>
+                    <td style={printStyles.td}>{safeText(w.qualification, '-')}</td>
+                    <td style={printStyles.td}>{safeText(w.salary, '-')}</td>
+                    <td style={printStyles.td}>{safeText(w.working, '-')}</td>
+                    <td style={printStyles.td}>{safeText(w.remarks, '-')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ fontSize: '11pt' }}>ജീവനക്കാരുടെ വിവരങ്ങൾ ചേർത്തിട്ടില്ല</div>
+          )}
+        </div>
+
+        {/* Rejection reason */}
+        {affiliation.status === 'rejected' && safeText(affiliation.rejectionReason, '').trim() ? (
+          <div style={printStyles.section} className="print-avoid-break">
+            <p style={printStyles.sectionTitle}>നിരസിക്കൽ കാരണം</p>
+            <div style={{ border: '0.75pt solid #000', padding: '6pt', whiteSpace: 'pre-wrap' }}>
+              {safeText(affiliation.rejectionReason)}
+            </div>
+          </div>
+        ) : null}
+
+        <div style={printStyles.footer}>
+          Generated on: {new Date().toLocaleDateString('en-IN')}
+        </div>
+      </div>
+    </div>
+
+    </>
   );
 };
 

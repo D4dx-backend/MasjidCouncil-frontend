@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { Calendar, X } from "lucide-react";
 import SuperAdminSidebar from "../components/SuperAdminSidebar";
 import SearchFilterControls from "../components/SearchFilterControls";
+import SuperAdminMobileBottomNav from "../components/SuperAdminMobileBottomNav";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -9,9 +11,13 @@ const SuperAdminAffiliationList = () => {
   const navigate = useNavigate();
   const [affiliations, setAffiliations] = useState([]);
   const [filteredAffiliations, setFilteredAffiliations] = useState([]);
+  const [searchFilteredAffiliations, setSearchFilteredAffiliations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showDateFilter, setShowDateFilter] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -20,9 +26,43 @@ const SuperAdminAffiliationList = () => {
 
   // Handle filtered data from SearchFilterControls
   const handleFilteredDataChange = useCallback((filteredData) => {
-    setFilteredAffiliations(filteredData);
+    setSearchFilteredAffiliations(filteredData);
     setCurrentPage(1); // Reset to first page when filters change
   }, []);
+
+  // Apply date range filtering
+  useEffect(() => {
+    let filtered = [...searchFilteredAffiliations];
+
+    if (startDate || endDate) {
+      filtered = filtered.filter((affiliation) => {
+        if (!affiliation.createdAt) return false;
+        
+        const submissionDate = new Date(affiliation.createdAt);
+        submissionDate.setHours(0, 0, 0, 0);
+
+        if (startDate && endDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          return submissionDate >= start && submissionDate <= end;
+        } else if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          return submissionDate >= start;
+        } else if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          return submissionDate <= end;
+        }
+        return true;
+      });
+    }
+
+    setFilteredAffiliations(filtered);
+    setCurrentPage(1);
+  }, [searchFilteredAffiliations, startDate, endDate]);
 
   const fetchAffiliations = async () => {
     try {
@@ -35,6 +75,7 @@ const SuperAdminAffiliationList = () => {
       const data = await response.json();
       if (data.success) {
         setAffiliations(data.data || []);
+        setSearchFilteredAffiliations(data.data || []);
       } else {
         setError(data.message || 'Failed to fetch affiliations');
       }
@@ -83,8 +124,8 @@ const SuperAdminAffiliationList = () => {
         ...new Set(
           affiliations
             .map((affiliation) =>
-              affiliation.address && affiliation.address[0]
-                ? affiliation.address[0].district
+              affiliation.jamathArea && affiliation.jamathArea[0]
+                ? affiliation.jamathArea[0].district
                 : null
             )
             .filter(Boolean)
@@ -99,22 +140,22 @@ const SuperAdminAffiliationList = () => {
       "name",
       "affiliationNumber",
       "trackingId",
-      "address.0.district",
+      "jamathArea.0.district",
       "jamathArea.0.area",
     ],
     []
   );
-  const filterFields = useMemo(() => ["status", "address.0.district"], []);
+  const filterFields = useMemo(() => ["status", "jamathArea.0.district"], []);
   const uniqueFieldValues = useMemo(
     () => ({
-      "address.0.district": uniqueDistricts,
+      "jamathArea.0.district": uniqueDistricts,
     }),
     [uniqueDistricts]
   );
   const filterFieldLabels = useMemo(
     () => ({
       status: "Status",
-      "address.0.district": "District",
+      "jamathArea.0.district": "District",
     }),
     []
   );
@@ -134,9 +175,69 @@ const SuperAdminAffiliationList = () => {
       <SuperAdminSidebar />
       
       <div className="flex-1 min-w-0">
-        <div className="p-8">
-          {/* Search and Filter Controls */}
-          <div className="flex justify-end mb-6">
+        <div className="p-4 lg:p-8 pb-24 lg:pb-8">
+          {/* Page Heading + Date Filter (top right) */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
+            <h1 className="text-3xl font-bold" style={{ fontFamily: "'Cinzel', serif" }}>
+              Affiliation List
+            </h1>
+            {/* Desktop/Tablet: Date Filter stays in header (unchanged). Mobile: Date Filter moved below search/filter */}
+            <div className="hidden sm:flex items-center h-10 w-full sm:w-auto">
+              {!showDateFilter ? (
+                <button
+                  onClick={() => setShowDateFilter(true)}
+                  className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-500 h-10 w-full sm:w-auto"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Date Filter
+                </button>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 animate-in slide-in-from-right-4 duration-500 w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 items-stretch sm:items-center w-full">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-gray-700">Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 w-full sm:w-auto sm:min-w-[150px]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-gray-700">End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        min={startDate}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 w-full sm:w-auto sm:min-w-[150px]"
+                      />
+                    </div>
+                    <div className="flex items-end h-9">
+                      <button
+                        onClick={() => {
+                          setStartDate('');
+                          setEndDate('');
+                        }}
+                        className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium w-full sm:w-auto"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDateFilter(false)}
+                    className="flex items-center justify-center w-full sm:w-8 h-10 sm:h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border sm:border-0 border-gray-300"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Search and Filter Controls (always open) */}
+          <div className="mb-6">
             <SearchFilterControls
               data={affiliations}
               onFilteredDataChange={handleFilteredDataChange}
@@ -144,7 +245,63 @@ const SuperAdminAffiliationList = () => {
               filterFields={filterFields}
               uniqueFieldValues={uniqueFieldValues}
               filterFieldLabels={filterFieldLabels}
+              collapseFilters={showDateFilter}
+              onFilterToggle={() => setShowDateFilter(false)}
             />
+          </div>
+
+          {/* Mobile-only: Date Filter comes AFTER Filter/Search */}
+          <div className="sm:hidden mb-4">
+            <div className="flex items-center h-10 w-full">
+              {!showDateFilter ? (
+                <button
+                  onClick={() => setShowDateFilter(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-500 h-10 w-full"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Date Filter
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2 animate-in slide-in-from-right-4 duration-500 w-full">
+                  <div className="flex flex-col gap-3 bg-white p-3 rounded-lg shadow-lg border border-gray-300 items-stretch w-full">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-gray-700">Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 w-full"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-gray-700">End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        min={startDate}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm h-9 w-full"
+                      />
+                    </div>
+                    <button
+                      onClick={() => {
+                        setStartDate('');
+                        setEndDate('');
+                      }}
+                      className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors h-9 font-medium w-full"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setShowDateFilter(false)}
+                    className="flex items-center justify-center w-full h-10 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-300"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
         {/* Main Content Card */}
@@ -206,8 +363,8 @@ const SuperAdminAffiliationList = () => {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm text-gray-600">
-                            {affiliation.address && affiliation.address[0] ? 
-                              `${affiliation.address[0].district || ''}, ${affiliation.jamathArea && affiliation.jamathArea[0] ? affiliation.jamathArea[0].area : ''}` : 
+                            {affiliation.jamathArea && affiliation.jamathArea[0] ? 
+                              `${affiliation.jamathArea[0].district || ''}, ${affiliation.jamathArea[0].area || ''}`.replace(/^,\s*|,\s*$/g, '').trim() || 'Not specified' : 
                               'Not specified'}
                           </div>
                         </td>
@@ -246,12 +403,12 @@ const SuperAdminAffiliationList = () => {
               </div>
               
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                      Showing {startIndex + 1} to {Math.min(endIndex, filteredAffiliations.length)} of {filteredAffiliations.length} results
-                    </div>
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    Showing {startIndex + 1} to {Math.min(endIndex, filteredAffiliations.length)} of {filteredAffiliations.length} results
+                  </div>
+                  {totalPages > 1 && (
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handlePageChange(currentPage - 1)}
@@ -281,15 +438,16 @@ const SuperAdminAffiliationList = () => {
                         Next
                       </button>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           )}
 
         </div>
         </div>
       </div>
+      <SuperAdminMobileBottomNav />
     </div>
   );
 };

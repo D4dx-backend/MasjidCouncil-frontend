@@ -70,39 +70,46 @@ const SuperAdminLogin = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-6 lg:p-8 relative pt-20"
-      style={{
-        backgroundImage: `url(${loginSuper})`,
-        backgroundSize: '40%',
-        backgroundPosition: 'left top',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#adc5cc'
-      }}
-    >
-      {/* Overlay to reduce image opacity */}
-      <div className="absolute inset-0 bg-white/70"></div>
-      
-
+    <>
+      <style>{`
+        .superadmin-login-container {
+          background-image: url(${loginSuper});
+          background-size: cover;
+          background-position: left top;
+          background-repeat: no-repeat;
+          background-attachment: scroll;
+          background-color: #adc5cc;
+        }
+        @media (min-width: 1024px) {
+          .superadmin-login-container {
+            background-size: 40%;
+            background-attachment: fixed;
+          }
+        }
+      `}</style>
+      <div 
+        className="superadmin-login-container min-h-screen flex items-center justify-center p-4 lg:p-6 xl:p-8 relative pt-16 lg:pt-20"
+      >
+        {/* Overlay to reduce image opacity */}
+        <div className="absolute inset-0 bg-white/70"></div>
 
       {/* Main Content */}
-      <div className="max-w-md w-full relative z-20 ml-180 -mt-24">
+      <div className="max-w-md w-full relative z-20 mx-auto lg:ml-[42rem] xl:ml-[53rem] lg:-mt-24">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8">
           {/* Professional Header Section */}
-          <div className="flex items-center justify-start mb-10 -ml-20">
+          <div className="flex items-center justify-center lg:justify-start mb-8 lg:mb-10 lg:-ml-20">
             <img 
               src={logo} 
               alt="Masjid Council Kerala" 
-              className="h-20 w-auto mr-8"
+              className="h-16 w-auto lg:h-20 mr-4 lg:mr-8"
             />
-            <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
+            <h1 className="text-2xl lg:text-3xl font-black text-gray-900" style={{ fontFamily: 'Cinzel, serif' }}>Super Admin Login</h1>
           </div>
           <div>
             <input
@@ -110,7 +117,7 @@ const SuperAdminLogin = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+              className="w-full lg:w-80 border-2 border-[#80a6b0] rounded-full px-5 lg:px-6 py-3 text-base lg:text-sm focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
               placeholder="Enter username"
               required
             />
@@ -123,13 +130,13 @@ const SuperAdminLogin = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-80 border-2 border-[#80a6b0] rounded-full px-6 py-3 pr-14 focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
+                className="w-full lg:w-80 border-2 border-[#80a6b0] rounded-full px-5 lg:px-6 py-3 pr-12 lg:pr-14 text-base lg:text-sm focus:ring-0 focus:border-[#80a6b0] transition-all duration-300 shadow-sm hover:shadow-md"
                 placeholder="Enter password"
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-36 flex items-center"
+                className="absolute inset-y-0 right-0 pr-4 lg:pr-36 flex items-center"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -144,20 +151,21 @@ const SuperAdminLogin = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ml-10"
+            className="w-full lg:w-64 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 lg:ml-10"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
       
-      {/* Arabic text at bottom */}
-      <div className="absolute bottom-6 right-74 text-right mb-12">
-        <p className="text-3xl text-gray-700 font-medium" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
+      {/* Arabic text at bottom - visible on all screens */}
+      <div className="absolute bottom-15 right-4 lg:bottom-12 lg:right-74 text-right mb-8 lg:mb-16 px-4 lg:px-0">
+        <p className="text-3xl lg:text-4xl text-gray-700 font-medium" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
           وَأَنَّ ٱلْمَسَٰجِدَ لِلَّهِ فَلَا تَدْعُواْ مَعَ ٱللَّهِ أَحَدًا
         </p>
       </div>
     </div>
+    </>
   );
 };
 

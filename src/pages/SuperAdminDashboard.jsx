@@ -6,10 +6,7 @@ import {
   Search,
   AlertCircle,
   CheckCircle,
-  Menu,
   X,
-  LogOut,
-  Home,
   FileText,
   Heart,
   Building2,
@@ -18,7 +15,8 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import SuperAdminMobileBottomNav from '../components/SuperAdminMobileBottomNav';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -29,10 +27,8 @@ const SuperAdminDashboard = () => {
   const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(null);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -366,19 +362,6 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = () => {
-    localStorage.removeItem('superAdminToken');
-    localStorage.removeItem('superAdminUser');
-    navigate('/');
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
 
   const openCreateModal = () => {
     setEditingAdmin(null);
@@ -421,121 +404,26 @@ const SuperAdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6db14e] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <>
+        <div className="min-h-screen bg-gray-50 pb-24 lg:pb-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6db14e] mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          </div>
         </div>
-      </div>
+        <SuperAdminMobileBottomNav />
+      </>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-xl transition-all duration-300 fixed h-full z-50 flex flex-col`}>
-        {/* Logo and Toggle */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="flex items-center space-x-3">
-                <img src={logo} alt="MCK Logo" className="h-10 w-auto" />
-                <span className="font-bold text-gray-900 text-sm">Super Admin</span>
-              </div>
-            )}
-            {!sidebarOpen && (
-              <img src={logo} alt="MCK Logo" className="h-10 w-auto mx-auto" />
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${!sidebarOpen ? 'mx-auto mt-2' : ''}`}
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
+      <SuperAdminSidebar onAddAdmin={openCreateModal} />
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button
-            onClick={() => navigate('/superadmin-dashboard')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-green-50 text-[#6db14e] font-medium w-full"
-          >
-            <Home className="w-5 h-5" />
-            {sidebarOpen && <span>Dashboard</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-affiliation-list')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <FileText className="w-5 h-5" />
-            {sidebarOpen && <span>Affiliation</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-medical-list')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <Heart className="w-5 h-5" />
-            {sidebarOpen && <span>Welfare Fund</span>}
-          </button>
-          
-          <button
-            onClick={() => navigate('/superadmin-mosque-fund-list')}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors w-full"
-          >
-            <Building2 className="w-5 h-5" />
-            {sidebarOpen && <span>Masjid Fund</span>}
-          </button>
-
-          <button
-            onClick={openCreateModal}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg bg-[#6db14e] text-white hover:bg-[#5fa644] transition-colors w-full mt-4"
-          >
-            <Plus className="w-5 h-5" />
-            {sidebarOpen && <span>Add Admin</span>}
-          </button>
-        </nav>
-
-        {/* User Indicator - Above Logout */}
-        <div className="p-4 border-t border-gray-200">
-          {sidebarOpen ? (
-            <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">Super Admin</p>
-                  <p className="text-xs text-gray-600 truncate">Full Access</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-3 flex justify-center">
-              <div className="w-10 h-10 bg-[#6db14e] rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content - No Header */}
-      <div className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
-        <div className="p-8">
+      {/* Main Content */}
+      <div className="flex-1 min-w-0">
+        <div className="p-4 lg:p-8 pb-24 lg:pb-8">
           {/* Alerts */}
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
@@ -689,6 +577,9 @@ const SuperAdminDashboard = () => {
                               {submission.name || submission.mosqueName || 'Unknown'}
                             </p>
                             <div className="flex items-center space-x-2 mt-1">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${typeInfo.color}`}>
+                                {typeInfo.text}
+                              </span>
                               <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(submission.status)}`}>
                                 {submission.status}
                               </span>
@@ -820,7 +711,7 @@ const SuperAdminDashboard = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
+          <div className="relative top-4 sm:top-10 lg:top-20 mx-auto p-6 w-full max-w-md shadow-2xl rounded-xl bg-white border border-gray-200">
             <div className="flex items-center justify-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">
                 {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
@@ -916,36 +807,7 @@ const SuperAdminDashboard = () => {
         </div>
       )}
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <LogOut className="w-6 h-6 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to logout?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={cancelLogout}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SuperAdminMobileBottomNav />
     </div>
   );
 };
