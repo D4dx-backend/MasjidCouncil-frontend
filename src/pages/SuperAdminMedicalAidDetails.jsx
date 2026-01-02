@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings } from 'lucide-react';
-import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Settings, Download } from 'lucide-react';
 import StatusChangeModal from '../components/StatusChangeModal';
+import logoPng from '../assets/logo.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,6 +21,7 @@ const SuperAdminMedicalAidDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [showStatusChangeModal, setShowStatusChangeModal] = useState(false);
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
 
   useEffect(() => {
     // Get the medical aid ID from location state
@@ -272,9 +273,125 @@ const SuperAdminMedicalAidDetails = () => {
   // Use actual formData instead of dummy data
   const displayData = formData || {};
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    if (!formData) {
+      showAlert('No form data available to print', 'error');
+      return;
+    }
+
+    const originalTitle = document.title;
+    const baseName = `MedicalAid-${displayData._id?.slice(-8) || displayData._id || 'Application'}`;
+
+    let fallbackTimer;
+
+    const cleanup = () => {
+      window.removeEventListener('afterprint', afterPrintHandler);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      document.title = originalTitle;
+      setPrintLoading(false);
+    };
+
+    const afterPrintHandler = () => {
+      cleanup();
+    };
+
+    window.addEventListener('afterprint', afterPrintHandler);
+    fallbackTimer = setTimeout(afterPrintHandler, 15000);
+
+    setPrintLoading(true);
+    document.title = baseName;
+
+    try {
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.print();
+    } catch (err) {
+      console.error('Print error:', err);
+      showAlert('Failed to open print dialog. Please try again.', 'error');
+      cleanup();
+    }
   };
+
+  const safeText = (value, fallback = 'വിവരം ഇല്ല') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  const safeNumberText = (value, fallback = '0') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  // Arabic/Hebrew ranges (RTL scripts)
+  const isRtlText = (value) => /[\u0590-\u05FF\u0600-\u06FF\u0750-\u08FF]/.test(String(value || ''));
+
+  const rtlValueStyle = (value) => (
+    isRtlText(value)
+      ? { direction: 'rtl', textAlign: 'center', fontFamily: 'Arial, "Noto Sans Malayalam", "Anek Malayalam Variable", sans-serif' }
+      : {}
+  );
+
+  const printStyles = {
+    page: {
+      background: '#fff',
+      color: '#000',
+      fontFamily: '"Noto Sans Malayalam", "Anek Malayalam Variable", Arial, sans-serif',
+      fontSize: '11pt',
+      lineHeight: '1.35',
+    },
+    headerWrap: { marginBottom: '10pt' },
+    headerRow: { display: 'flex', alignItems: 'center', gap: '10pt', marginBottom: '8pt' },
+    logo: { width: '52pt', height: '52pt', objectFit: 'contain' },
+    titleMl: { fontSize: '14pt', fontWeight: 700, margin: 0 },
+    subtitleEn: { fontSize: '11pt', fontWeight: 400, margin: 0 },
+    metaRow: { display: 'flex', justifyContent: 'space-between', gap: '12pt', fontSize: '10.5pt' },
+    metaItem: { flex: 1 },
+    metaLabel: { fontWeight: 700 },
+    divider: { borderTop: '1pt solid #000', margin: '8pt 0 0 0' },
+    section: { marginTop: '12pt' },
+    sectionTitle: { fontSize: '12pt', fontWeight: 700, margin: '0 0 6pt 0' },
+    table: { width: '100%', borderCollapse: 'collapse' },
+    th: {
+      width: '34%',
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 700,
+    },
+    td: {
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 400,
+      wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
+    },
+    list: { margin: '0', paddingLeft: '16pt' },
+    listItem: { margin: '0 0 2pt 0' },
+    footer: { marginTop: '14pt', fontSize: '9pt', textAlign: 'center' },
+  };
+
+  const statusMl =
+    displayData.status === 'approved'
+      ? 'അനുമതി'
+      : displayData.status === 'rejected'
+      ? 'നിരസിച്ചു'
+      : 'പരിഗണനയിൽ';
+
+  const submittedDate = displayData.submissionDate
+    ? safeText(displayData.submissionDate, 'N/A')
+    : (displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString('ml-IN') : 'N/A');
+
+  const expectedExpense = parseInt(displayData.expectedExpense || 0, 10);
+  const ownContribution = parseInt(displayData.ownContribution || 0, 10);
+  const requestedAmount = expectedExpense - ownContribution;
 
   const handleDownload = () => {
     alert('ഡൗൺലോഡ് ഫീച്ചർ ഉടൻ ലഭ്യമാകും');
@@ -303,24 +420,45 @@ const SuperAdminMedicalAidDetails = () => {
   };
 
   return (
+    <>
+    <div className="screen-only">
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Anek Malayalam Variable" }}>
-      <SuperAdminNavbar />
       <div className="p-4">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
           {/* Header */}
           <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={handleBack}
-                className="p-2 hover:bg-green-700 rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
-                <p className="text-green-100 text-sm">Medical Aid Application Details</p>
-                <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={handleBack}
+                  className="p-2 hover:bg-green-700 rounded-full transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+                  <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+                  <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+                </div>
               </div>
+
+              <button
+                onClick={handlePrint}
+                disabled={printLoading}
+                className="flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-semibold px-4 py-2 rounded-md shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {printLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Preparing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>Print / Save PDF</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -719,6 +857,218 @@ const SuperAdminMedicalAidDetails = () => {
         formType="Medical Aid"
       />
     </div>
+    </div>
+
+    {/* Print-only document (browser-native PDF generation via window.print()) */}
+    <div className="print-only">
+      <div style={printStyles.page}>
+        <div style={printStyles.headerWrap} className="print-avoid-break">
+          <div style={printStyles.headerRow}>
+            <img src={logoPng} alt="Masjid Council Kerala" style={printStyles.logo} />
+            <div>
+              <p style={printStyles.titleMl}>ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</p>
+              <p style={printStyles.subtitleEn}>Medical Aid Application Details</p>
+            </div>
+          </div>
+
+          <div style={printStyles.metaRow}>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Application ID: </span>
+              <span>{safeText(displayData._id?.slice(-8) || displayData._id, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Status: </span>
+              <span>{safeText(statusMl, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Submitted: </span>
+              <span>{safeText(submittedDate, 'N/A')}</span>
+            </div>
+          </div>
+
+          <div style={printStyles.metaRow}>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Requested Amount: </span>
+              <span>₹{safeNumberText(String(requestedAmount))}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Expected Expense: </span>
+              <span>₹{safeNumberText(displayData.expectedExpense)}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Own Contribution: </span>
+              <span>₹{safeNumberText(displayData.ownContribution)}</span>
+            </div>
+          </div>
+
+          <div style={printStyles.divider} />
+        </div>
+
+        {/* Mosque Information */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മസ്ജിദ് വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>മസ്ജിദിന്റെ പേര്</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.mosqueName) }}>{safeText(displayData.mosqueName, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>MCK അഫിലിയേഷൻ നമ്പർ</th>
+                <td style={printStyles.td}>{safeText(displayData.mckAffiliation, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വിലാസം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.address) }}>{safeText(displayData.address, 'N/A')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Management Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മാനേജ്മെന്റ് വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പരിപാലന കമ്മിറ്റി പ്രസിഡന്റ്</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.committeePerson) }}>{safeText(displayData.committeePerson, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>മാനേജ്മെന്റ് തരം</th>
+                <td style={printStyles.td}>{safeText(displayData.managementType, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ഫോൺ</th>
+                <td style={printStyles.td}>{safeText(displayData.phone, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വാട്സ്ആപ്പ്</th>
+                <td style={printStyles.td}>{safeText(displayData.whatsapp, 'N/A')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Jamaat Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>ഏരിയ</th>
+                <td style={printStyles.td}>{safeText(displayData.area, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജില്ല</th>
+                <td style={printStyles.td}>{safeText(displayData.district, 'N/A')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Applicant Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>അപേക്ഷ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>അപേക്ഷ സമർപ്പിക്കുന്നത് ആർക്കാണ് വേണ്ടി</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.applicantDetails) }}>{safeText(displayData.applicantDetails, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജോലി ചെയ്യുന്ന തസ്‌തിക</th>
+                <td style={printStyles.td}>{safeText(displayData.chairmanDesignation, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വേതനം</th>
+                <td style={printStyles.td}>₹{safeNumberText(displayData.salary)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Help Request */}
+        <div style={printStyles.section}>
+          <p style={printStyles.sectionTitle}>സഹായാഭ്യർത്ഥന വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>സഹായത്തിന്റെ ഉദ്ദേശ്യം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.helpPurpose) }}>{safeText(displayData.helpPurpose, 'N/A')}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ആവശ്യത്തിന്റെ വിശദവിവരം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(displayData.needDescription) }}>{safeText(displayData.needDescription, 'N/A')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Previous Help */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മുമ്പത്തെ സഹായം</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>MCK യിൽ നിന്ന് മുമ്പ് സഹായം ലഭിച്ചിട്ടുണ്ടോ?</th>
+                <td style={printStyles.td}>{safeText(displayData.previousHelp, 'N/A')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Officials */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പ്രസിഡന്‍റ് / സെക്രട്ടറി</th>
+                <td style={printStyles.td}>
+                  {safeText(displayData.mosquePresident, '-')}{'\n'}
+                  ഫോൺ: {safeText(displayData.mosquePhone, '-')}
+                </td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>അടിയന്തിര ബന്ധം</th>
+                <td style={printStyles.td}>
+                  {safeText(displayData.emergencyContact, '-')}{'\n'}
+                  ഫോൺ: {safeText(displayData.emergencyPhone, '-')}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Required Documents */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ആവശ്യമായ രേഖകൾ</p>
+          <ul style={printStyles.list}>
+            <li style={printStyles.listItem}>ജീവനക്കാരന്റെ ആധാർ കോപ്പി</li>
+            <li style={printStyles.listItem}>മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</li>
+            <li style={printStyles.listItem}>വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</li>
+            <li style={printStyles.listItem}>വീടിന്റെ ഫോട്ടോകൾ</li>
+          </ul>
+        </div>
+
+        {/* Rejection reason */}
+        {displayData.status === 'rejected' && safeText(displayData.rejectionReason, '').trim() ? (
+          <div style={printStyles.section} className="print-avoid-break">
+            <p style={printStyles.sectionTitle}>നിരസിക്കൽ കാരണം</p>
+            <div style={{ border: '0.75pt solid #000', padding: '6pt', whiteSpace: 'pre-wrap' }}>
+              {safeText(displayData.rejectionReason)}
+            </div>
+          </div>
+        ) : null}
+
+        <div style={printStyles.footer}>
+          Generated on: {new Date().toLocaleDateString('en-IN')}
+        </div>
+      </div>
+    </div>
+
+    </>
   );
 };
 

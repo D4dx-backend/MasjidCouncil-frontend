@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Download } from 'lucide-react';
+import logoPng from '../assets/logo.png';
+import AdminMobileBottomNav from '../components/AdminMobileBottomNav';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,6 +19,7 @@ const MedicalAidDataList = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [actionLoading, setActionLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
 
   useEffect(() => {
     // Get the medical aid ID from location state
@@ -67,6 +70,48 @@ const MedicalAidDataList = () => {
   const closeAlert = () => {
     setShowAlertModal(false);
     setAlertMessage('');
+  };
+
+  const handlePrint = async () => {
+    if (!formData) {
+      showAlert('No form data available to print', 'error');
+      return;
+    }
+
+    const originalTitle = document.title;
+    const baseName = `MedicalAid-${formData._id?.slice(-8) || formData._id || 'Application'}`;
+
+    let fallbackTimer;
+
+    const cleanup = () => {
+      window.removeEventListener('afterprint', afterPrintHandler);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      document.title = originalTitle;
+      setPrintLoading(false);
+    };
+
+    const afterPrintHandler = () => {
+      cleanup();
+    };
+
+    window.addEventListener('afterprint', afterPrintHandler);
+    fallbackTimer = setTimeout(afterPrintHandler, 15000);
+
+    setPrintLoading(true);
+    document.title = baseName;
+
+    try {
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.print();
+    } catch (err) {
+      console.error('Print error:', err);
+      showAlert('Failed to open print dialog. Please try again.', 'error');
+      cleanup();
+    }
   };
 
   const handleConfirmClick = () => {
@@ -168,68 +213,168 @@ const MedicalAidDataList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading medical aid details...</p>
+      <>
+        <div className="min-h-screen bg-gray-50 p-4 pb-24 lg:pb-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading medical aid details...</p>
+          </div>
         </div>
-      </div>
+        <AdminMobileBottomNav />
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
-            Error: {error}
-          </h2>
-          <button 
-            onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Go Back
-          </button>
+      <>
+        <div className="min-h-screen bg-gray-50 p-4 pb-24 lg:pb-0 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-red-600 mb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              Error: {error}
+            </h2>
+            <button 
+              onClick={handleBack}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
-      </div>
+        <AdminMobileBottomNav />
+      </>
     );
   }
 
   if (!formData) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
-            ഡാറ്റ ലഭ്യമല്ല
-          </h2>
-          <button 
-            onClick={handleBack}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
-          >
-            Go Back
-          </button>
+      <>
+        <div className="min-h-screen bg-gray-50 p-4 pb-24 lg:pb-0 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-600" style={{ fontFamily: "Anek Malayalam Variable" }}>
+              ഡാറ്റ ലഭ്യമല്ല
+            </h2>
+            <button 
+              onClick={handleBack}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
-      </div>
+        <AdminMobileBottomNav />
+      </>
     );
   }
 
+  const safeText = (value, fallback = 'വിവരം ഇല്ല') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  const safeNumberText = (value, fallback = '0') => {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).trim();
+    return s.length ? s : fallback;
+  };
+
+  // Arabic/Hebrew ranges (RTL scripts)
+  const isRtlText = (value) => /[\u0590-\u05FF\u0600-\u06FF\u0750-\u08FF]/.test(String(value || ''));
+
+  const rtlValueStyle = (value) => (
+    isRtlText(value)
+      ? { direction: 'rtl', textAlign: 'center', fontFamily: 'Arial, "Noto Sans Malayalam", "Anek Malayalam Variable", sans-serif' }
+      : {}
+  );
+
+  const printStyles = {
+    page: {
+      background: '#fff',
+      color: '#000',
+      fontFamily: '"Noto Sans Malayalam", "Anek Malayalam Variable", Arial, sans-serif',
+      fontSize: '11pt',
+      lineHeight: '1.35',
+    },
+    headerWrap: { marginBottom: '10pt' },
+    headerRow: { display: 'flex', alignItems: 'center', gap: '10pt', marginBottom: '8pt' },
+    logo: { width: '52pt', height: '52pt', objectFit: 'contain' },
+    titleMl: { fontSize: '14pt', fontWeight: 700, margin: 0 },
+    subtitleEn: { fontSize: '11pt', fontWeight: 400, margin: 0 },
+    metaRow: { display: 'flex', justifyContent: 'space-between', gap: '12pt', fontSize: '10.5pt' },
+    metaItem: { flex: 1 },
+    metaLabel: { fontWeight: 700 },
+    divider: { borderTop: '1pt solid #000', margin: '8pt 0 0 0' },
+    section: { marginTop: '12pt' },
+    sectionTitle: { fontSize: '12pt', fontWeight: 700, margin: '0 0 6pt 0' },
+    table: { width: '100%', borderCollapse: 'collapse' },
+    th: {
+      width: '34%',
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 700,
+    },
+    td: {
+      border: '0.75pt solid #000',
+      padding: '4pt 6pt',
+      textAlign: 'left',
+      verticalAlign: 'top',
+      fontWeight: 400,
+      wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
+    },
+    list: { margin: '0', paddingLeft: '16pt' },
+    listItem: { margin: '0 0 2pt 0' },
+    footer: { marginTop: '14pt', fontSize: '9pt', textAlign: 'center' },
+  };
+
+  const submittedDate = formData.createdAt ? new Date(formData.createdAt).toLocaleDateString('ml-IN') : 'N/A';
+  const statusMl = formData.status === 'approved' ? 'അനുമതി' : formData.status === 'rejected' ? 'നിരസിച്ചു' : 'പരിഗണനയിൽ';
+  const expectedExpense = parseInt(formData.expectedExpense || 0, 10);
+  const ownContribution = parseInt(formData.ownContribution || 0, 10);
+  const requestedAmount = expectedExpense - ownContribution;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
+    <>
+    <div className="screen-only">
+    <div className="min-h-screen bg-gray-50 p-4 pb-24 lg:pb-4" style={{ fontFamily: "Anek Malayalam Variable" }}>
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#5e9e44] to-[#9ece88] text-white p-4 rounded-t-lg">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handleBack}
-              className="p-2 hover:bg-green-700 rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
-              <p className="text-green-100 text-sm">Medical Aid Application Details</p>
-              <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleBack}
+                className="p-2 hover:bg-green-700 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold">ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</h1>
+                <p className="text-green-100 text-sm">Medical Aid Application Details</p>
+                <p className="text-green-200 text-xs">Application ID: {formData._id?.slice(-8) || 'N/A'}</p>
+              </div>
             </div>
+
+            <button
+              onClick={handlePrint}
+              disabled={printLoading}
+              className="flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-semibold px-4 py-2 rounded-md shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {printLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Preparing...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Print / Save PDF</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -628,6 +773,219 @@ const MedicalAidDataList = () => {
         </div>
       )}
     </div>
+    </div>
+    <AdminMobileBottomNav />
+
+    {/* Print-only document (browser-native PDF generation via window.print()) */}
+    <div className="print-only">
+      <div style={printStyles.page}>
+        <div style={printStyles.headerWrap} className="print-avoid-break">
+          <div style={printStyles.headerRow}>
+            <img src={logoPng} alt="Masjid Council Kerala" style={printStyles.logo} />
+            <div>
+              <p style={printStyles.titleMl}>ഇമാം മുഅദ്ദിൻ ക്ഷേമനിദി അപേക്ഷ</p>
+              <p style={printStyles.subtitleEn}>Medical Aid Application Details</p>
+            </div>
+          </div>
+
+          <div style={printStyles.metaRow}>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Application ID: </span>
+              <span>{safeText(formData._id?.slice(-8) || formData._id, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Status: </span>
+              <span>{safeText(statusMl, 'N/A')}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Submitted: </span>
+              <span>{safeText(submittedDate, 'N/A')}</span>
+            </div>
+          </div>
+
+          <div style={printStyles.metaRow}>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Requested Amount: </span>
+              <span>₹{safeNumberText(String(requestedAmount))}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Expected Expense: </span>
+              <span>₹{safeNumberText(formData.expectedExpense)}</span>
+            </div>
+            <div style={printStyles.metaItem}>
+              <span style={printStyles.metaLabel}>Own Contribution: </span>
+              <span>₹{safeNumberText(formData.ownContribution)}</span>
+            </div>
+          </div>
+
+          <div style={printStyles.divider} />
+        </div>
+
+        {/* Mosque Information */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മസ്ജിദ് വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>മസ്ജിദിന്റെ പേര്</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.mosqueName) }}>{safeText(formData.mosqueName)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>MCK അഫിലിയേഷൻ നമ്പർ</th>
+                <td style={printStyles.td}>{safeText(formData.mckAffiliation)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വിലാസം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.address) }}>{safeText(formData.address)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Management Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മാനേജ്മെന്റ് വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പരിപാലന കമ്മിറ്റി പ്രസിഡന്റ്</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.committeePerson) }}>{safeText(formData.committeePerson)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>മാനേജ്മെന്റ് തരം</th>
+                <td style={printStyles.td}>{safeText(formData.managementType)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ഫോൺ</th>
+                <td style={printStyles.td}>{safeText(formData.phone)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വാട്സ്ആപ്പ്</th>
+                <td style={printStyles.td}>{safeText(formData.whatsapp)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Jamaat Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ജമാഅത്തെ ഇസ്‌ലാമി വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>ഏരിയ</th>
+                <td style={printStyles.td}>{safeText(formData.area)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജില്ല</th>
+                <td style={printStyles.td}>{safeText(formData.district)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Applicant Details */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>അപേക്ഷ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>അപേക്ഷ സമർപ്പിക്കുന്നത് ആർക്കാണ് വേണ്ടി</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.applicantDetails) }}>{safeText(formData.applicantDetails)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ജോലി ചെയ്യുന്ന തസ്‌തിക</th>
+                <td style={printStyles.td}>{safeText(formData.chairmanDesignation)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>വേതനം</th>
+                <td style={printStyles.td}>₹{safeNumberText(formData.salary)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Help Request Details */}
+        <div style={printStyles.section}>
+          <p style={printStyles.sectionTitle}>സഹായാഭ്യർത്ഥന വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>സഹായത്തിന്റെ ഉദ്ദേശ്യം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.helpPurpose) }}>{safeText(formData.helpPurpose)}</td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>ആവശ്യത്തിന്റെ വിശദവിവരം</th>
+                <td style={{ ...printStyles.td, ...rtlValueStyle(formData.needDescription) }}>{safeText(formData.needDescription)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Previous Help */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മുമ്പത്തെ സഹായം</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>MCK യിൽ നിന്ന് മുമ്പ് സഹായം ലഭിച്ചിട്ടുണ്ടോ?</th>
+                <td style={printStyles.td}>{safeText(formData.previousHelp)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mosque Officials */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>മസ്‌ജിദ് ഉദ്യോഗസ്ഥ വിവരങ്ങൾ</p>
+          <table style={printStyles.table}>
+            <tbody>
+              <tr>
+                <th style={printStyles.th}>പ്രസിഡന്‍റ് / സെക്രട്ടറി</th>
+                <td style={printStyles.td}>
+                  {safeText(formData.mosquePresident, '-')}{'\n'}
+                  ഫോൺ: {safeText(formData.mosquePhone, '-')}
+                </td>
+              </tr>
+              <tr>
+                <th style={printStyles.th}>അടിയന്തിര ബന്ധം</th>
+                <td style={printStyles.td}>
+                  {safeText(formData.emergencyContact, '-')}{'\n'}
+                  ഫോൺ: {safeText(formData.emergencyPhone, '-')}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Required Documents */}
+        <div style={printStyles.section} className="print-avoid-break">
+          <p style={printStyles.sectionTitle}>ആവശ്യമായ രേഖകൾ</p>
+          <ul style={printStyles.list}>
+            <li style={printStyles.listItem}>ജീവനക്കാരന്റെ ആധാർ കോപ്പി</li>
+            <li style={printStyles.listItem}>മസ്ജിദ് ബാങ്ക് പാസ് ബുക്ക് കോപ്പി</li>
+            <li style={printStyles.listItem}>വീട് റിപ്പയർ എസ്റ്റിമേറ്റ്</li>
+            <li style={printStyles.listItem}>വീടിന്റെ ഫോട്ടോകൾ</li>
+          </ul>
+        </div>
+
+        {/* Rejection reason */}
+        {formData.status === 'rejected' && safeText(formData.rejectionReason, '').trim() ? (
+          <div style={printStyles.section} className="print-avoid-break">
+            <p style={printStyles.sectionTitle}>നിരസിക്കൽ കാരണം</p>
+            <div style={{ border: '0.75pt solid #000', padding: '6pt', whiteSpace: 'pre-wrap' }}>
+              {safeText(formData.rejectionReason)}
+            </div>
+          </div>
+        ) : null}
+
+        <div style={printStyles.footer}>
+          Generated on: {new Date().toLocaleDateString('en-IN')}
+        </div>
+      </div>
+    </div>
+
+    </>
   );
 };
 

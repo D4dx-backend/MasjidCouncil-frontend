@@ -66,19 +66,28 @@ const AdminLogin = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `url(${adminLogin})`,
-        backgroundSize: '57%',
-        backgroundPosition: 'left top',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#97cee2'
-      }}
-    >
-      {/* Overlay to reduce image opacity */}
-      <div className="absolute inset-0 bg-white/70"></div>
+    <>
+      <style>{`
+        .admin-login-container {
+          background-image: url(${adminLogin});
+          background-size: cover;
+          background-position: left top;
+          background-repeat: no-repeat;
+          background-attachment: scroll;
+          background-color: #97cee2;
+        }
+        @media (min-width: 1024px) {
+          .admin-login-container {
+            background-size: 57%;
+            background-attachment: fixed;
+          }
+        }
+      `}</style>
+      <div 
+        className="admin-login-container min-h-screen flex items-center justify-center p-4 lg:p-4 relative"
+      >
+        {/* Overlay to reduce image opacity */}
+        <div className="absolute inset-0 bg-white/70"></div>
 
       {/* Home Button (Top Right) */}
       <button
@@ -86,19 +95,19 @@ const AdminLogin = () => {
         onClick={handleGoHome}
         title="Go to Home"
         aria-label="Go to Home"
-        className="absolute top-5 right-5 z-30 inline-flex items-center justify-center h-11 w-11 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="absolute top-4 right-4 lg:top-5 lg:right-5 z-30 inline-flex items-center justify-center h-10 w-10 lg:h-11 lg:w-11 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
       >
-        <Home className="h-5 w-5" />
+        <Home className="h-4 w-4 lg:h-5 lg:w-5" />
       </button>
       
-      <div className="max-w-md w-full relative z-20 ml-auto mr-18 mt-4">
+      <div className="max-w-md w-full relative z-20 mx-auto lg:ml-auto lg:mr-18 lg:mt-4">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center mb-4 mr-16">
-            <img src={logo} alt="Masjid Council Kerala" className="h-16 w-auto mr-4" />
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center justify-center mb-4 lg:mr-16">
+            <img src={logo} alt="Masjid Council Kerala" className="h-14 w-auto lg:h-16 mr-3 lg:mr-4" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
-              <p className="text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
+              <p className="text-sm lg:text-base text-gray-600">അഡ്മിൻ ലോഗിൻ</p>
             </div>
           </div>
           <div className="w-16 h-1 bg-green-500 mx-auto mt-3 rounded-full"></div>
@@ -111,7 +120,7 @@ const AdminLogin = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 lg:space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mobile Number (മൊബൈൽ നമ്പർ)
@@ -121,7 +130,7 @@ const AdminLogin = () => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full border border-gray-300 rounded-lg p-3 text-base lg:text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
               placeholder="Enter 10-digit mobile number"
               required
             />
@@ -136,7 +145,7 @@ const AdminLogin = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full border border-gray-300 rounded-lg p-3 text-base lg:text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
               placeholder="Enter password"
               required
             />
@@ -145,11 +154,11 @@ const AdminLogin = () => {
             </p>
           </div>
 
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               type="submit"
               disabled={loading}
-              className="w-48 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full sm:w-48 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-3 lg:py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -163,7 +172,7 @@ const AdminLogin = () => {
             
             <button
               type="button"
-              className="w-40 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full sm:w-40 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 lg:py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
               onClick={handleSuperAdminClick}
             >
               <span className="text-sm">Super Admin</span>
@@ -173,7 +182,7 @@ const AdminLogin = () => {
         </form>
 
         {/* Login Instructions */}
-        <div className="mt-6 p-6 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="mt-5 lg:mt-6 p-4 lg:p-6 bg-blue-50 rounded-lg border border-blue-100">
           <div className="flex items-center mb-4">
             <div className="bg-blue-100 p-2 rounded-full mr-3">
               <Info className="h-4 w-4 text-blue-600" />
@@ -211,6 +220,7 @@ const AdminLogin = () => {
 
       </div>
     </div>
+    </>
   );
 };
 
